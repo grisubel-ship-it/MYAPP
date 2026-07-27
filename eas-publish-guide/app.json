@@ -1,0 +1,77 @@
+{
+  "expo": {
+    "name": "Cronici",
+    "slug": "cronici",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "scheme": "cronici",
+    "userInterfaceStyle": "automatic",
+    "newArchEnabled": true,
+    "splash": {
+      "image": "./assets/splash.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#0F766E"
+    },
+    "assetBundlePatterns": [
+      "**/*"
+    ],
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.tuazienda.cronici",
+      "buildNumber": "1"
+    },
+    "android": {
+      "package": "com.tuazienda.cronici",
+      "versionCode": 1,
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/adaptive-icon.png",
+        "backgroundColor": "#0F766E"
+      },
+      "permissions": [
+        "INTERNET",
+        "ACCESS_NETWORK_STATE",
+        "VIBRATE",
+        "RECEIVE_BOOT_COMPLETED",
+        "SCHEDULE_EXACT_ALARM",
+        "POST_NOTIFICATIONS"
+      ],
+      "blockedPermissions": [],
+      "edgeToEdgeEnabled": true
+    },
+    "web": {
+      "favicon": "./assets/favicon.png",
+      "bundler": "metro"
+    },
+    "plugins": [
+      [
+        "expo-splash-screen",
+        {
+          "image": "./assets/splash.png",
+          "imageWidth": 200,
+          "resizeMode": "contain",
+          "backgroundColor": "#0F766E"
+        }
+      ],
+      "expo-notifications",
+      "expo-secure-store"
+    ],
+    "notification": {
+      "icon": "./assets/notification-icon.png",
+      "color": "#0F766E",
+      "androidMode": "default"
+    },
+    "extra": {
+      "eas": {
+        "projectId": "SOSTITUISCI-CON-IL-TUO-PROJECT-ID"
+      }
+    },
+    "owner": "SOSTITUISCI-CON-IL-TUO-USERNAME-EXPO",
+    "runtimeVersion": {
+      "policy": "appVersion"
+    },
+    "updates": {
+      "url": "https://u.expo.dev/SOSTITUISCI-CON-IL-TUO-PROJECT-ID"
+    }
+  }
+}
