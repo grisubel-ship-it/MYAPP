@@ -1,4 +1,4 @@
-package com.caregiversync.app;
+package com.caregiversync.assistiti;
 
 import com.getcapacitor.BridgeActivity;
 

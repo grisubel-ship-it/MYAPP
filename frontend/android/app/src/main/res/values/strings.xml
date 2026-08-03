@@ -2,6 +2,6 @@
 <resources>
     <string name="app_name">Caregiver Sync</string>
     <string name="title_activity_main">Caregiver Sync</string>
-    <string name="package_name">com.caregiversync.app</string>
-    <string name="custom_url_scheme">com.caregiversync.app</string>
+    <string name="package_name">com.caregiversync.assistiti</string>
+    <string name="custom_url_scheme">com.caregiversync.assistiti</string>
 </resources>

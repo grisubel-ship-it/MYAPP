@@ -18,6 +18,9 @@ import {
   MoreVertical,
   Eraser,
   ListX,
+  Sparkles,
+  Copy,
+  X,
 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
@@ -26,6 +29,14 @@ import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import {
   Select,
   SelectContent,
@@ -433,6 +444,10 @@ function PatientDetail() {
   const [patient, setPatient] = useState(null);
   const [entries, setEntries] = useState([]);
   const [entryForm, setEntryForm] = useState({ kind: "vital", label: "", value: "", unit: "" });
+  const [handoverOpen, setHandoverOpen] = useState(false);
+  const [handoverLoading, setHandoverLoading] = useState(false);
+  const [handoverText, setHandoverText] = useState("");
+  const [handoverHours, setHandoverHours] = useState(24);
 
   const load = async () => {
     try {
@@ -493,6 +508,35 @@ function PatientDetail() {
       load();
     } catch {
       toast.error("Errore durante l'eliminazione");
+    }
+  };
+
+  const generateHandover = async () => {
+    setHandoverOpen(true);
+    setHandoverLoading(true);
+    setHandoverText("");
+    try {
+      const { data } = await axios.post(`${API}/ai/handover`, {
+        patient_id: id,
+        hours: handoverHours,
+      });
+      setHandoverText(data.handover || "Nessun contenuto generato.");
+    } catch (err) {
+      const msg = err?.response?.data?.detail ?? "Impossibile generare la consegna.";
+      setHandoverText("");
+      toast.error(msg);
+      setHandoverOpen(false);
+    } finally {
+      setHandoverLoading(false);
+    }
+  };
+
+  const copyHandover = async () => {
+    try {
+      await navigator.clipboard.writeText(handoverText);
+      toast.success("Consegna copiata negli appunti");
+    } catch {
+      toast.error("Impossibile copiare");
     }
   };
 
@@ -593,6 +637,42 @@ function PatientDetail() {
           ]}
         />
       </div>
+
+      {/* AI Handover generator */}
+      <Card className="border-teal-200 bg-gradient-to-br from-teal-50 to-white">
+        <CardContent className="p-4 flex items-center gap-4">
+          <div className="w-11 h-11 rounded-xl bg-teal-600 grid place-items-center shrink-0">
+            <Sparkles size={20} className="text-white" />
+          </div>
+          <div className="flex-1 min-w-0">
+            <div className="font-semibold text-stone-900">Consegna con IA</div>
+            <div className="text-sm text-stone-600">
+              Genera una nota di passaggio consegne per il turno successivo, basata sulle voci del diario
+            </div>
+          </div>
+          <div className="flex items-center gap-2 shrink-0">
+            <Select value={String(handoverHours)} onValueChange={(v) => setHandoverHours(parseInt(v, 10))}>
+              <SelectTrigger className="w-[110px]" data-testid="handover-hours-select">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="8">Ultime 8h</SelectItem>
+                <SelectItem value="12">Ultime 12h</SelectItem>
+                <SelectItem value="24">Ultime 24h</SelectItem>
+                <SelectItem value="72">Ultimi 3g</SelectItem>
+              </SelectContent>
+            </Select>
+            <Button
+              onClick={generateHandover}
+              disabled={handoverLoading || entries.length === 0}
+              className="bg-teal-600 hover:bg-teal-700"
+              data-testid="generate-handover-btn"
+            >
+              <Sparkles size={16} className="mr-1" /> Genera
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
 
       {/* Add entry form */}
       <Card>
@@ -696,6 +776,54 @@ function PatientDetail() {
           );
         })}
       </div>
+
+      {/* AI Handover Dialog */}
+      <Dialog open={handoverOpen} onOpenChange={setHandoverOpen}>
+        <DialogContent className="max-w-2xl max-h-[85vh] overflow-hidden flex flex-col" data-testid="handover-dialog">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Sparkles size={18} className="text-teal-600" />
+              Consegna generata per {patient.name}
+            </DialogTitle>
+            <DialogDescription>
+              Generata dall'IA dalle voci del diario delle ultime {handoverHours} ore. Rileggila prima di condividerla.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="flex-1 overflow-y-auto py-3">
+            {handoverLoading ? (
+              <div className="flex items-center gap-3 text-stone-500 py-8 justify-center">
+                <div className="w-2 h-2 rounded-full bg-teal-600 animate-pulse" />
+                <div className="w-2 h-2 rounded-full bg-teal-600 animate-pulse" style={{ animationDelay: "0.15s" }} />
+                <div className="w-2 h-2 rounded-full bg-teal-600 animate-pulse" style={{ animationDelay: "0.3s" }} />
+                <span className="ml-2">Sto elaborando il diario…</span>
+              </div>
+            ) : (
+              <pre
+                className="whitespace-pre-wrap font-sans text-sm text-stone-800 leading-relaxed"
+                data-testid="handover-text"
+              >
+                {handoverText}
+              </pre>
+            )}
+          </div>
+          <DialogFooter className="border-t pt-3">
+            <div className="text-xs text-stone-500 mr-auto max-w-[60%]">
+              ⚠️ Contenuto generato dall'IA. Non sostituisce il parere medico.
+            </div>
+            <Button variant="outline" onClick={() => setHandoverOpen(false)} data-testid="handover-close-btn">
+              <X size={16} className="mr-1" /> Chiudi
+            </Button>
+            <Button
+              onClick={copyHandover}
+              disabled={handoverLoading || !handoverText}
+              className="bg-teal-600 hover:bg-teal-700"
+              data-testid="handover-copy-btn"
+            >
+              <Copy size={16} className="mr-1" /> Copia
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

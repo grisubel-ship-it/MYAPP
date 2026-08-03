@@ -1,14 +1,14 @@
 apply plugin: 'com.android.application'
 
 android {
-    namespace "com.caregiversync.app"
+    namespace "com.caregiversync.assistiti"
     compileSdk rootProject.ext.compileSdkVersion
     defaultConfig {
-        applicationId "com.caregiversync.app"
+        applicationId "com.caregiversync.assistiti"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
-        versionCode 2
-        versionName "1.0.1"
+        versionCode 1
+        versionName "1.0.0"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         aaptOptions {
              // Files and dirs to omit from the packaged assets dir, modified to accommodate modern web apps.
@@ -19,9 +19,9 @@ android {
     signingConfigs {
         release {
             keyAlias 'caregiver-sync'
-            keyPassword 'CaregiverSync2026!'
+            keyPassword 'CGSync2026#SecureKey'
             storeFile file('../caregiver-sync-release.jks')
-            storePassword 'CaregiverSync2026!'
+            storePassword 'CGSync2026#SecureKey'
         }
     }
     buildTypes {

@@ -202,6 +202,81 @@ async def wipe_all():
     return {"wiped": True, "patients": p.deleted_count, "entries": e.deleted_count}
 
 
+# ----- AI: Handover note generation -----
+class HandoverRequest(BaseModel):
+    patient_id: str
+    hours: Optional[int] = 24  # ultime N ore da riassumere
+
+
+@api_router.post("/ai/handover")
+async def ai_handover(payload: HandoverRequest):
+    """Genera una nota di consegna basata sulle voci del diario dell'assistito."""
+    from emergentintegrations.llm.chat import LlmChat, UserMessage
+    from datetime import timedelta
+
+    patient = await db.patients.find_one({"id": payload.patient_id}, {"_id": 0})
+    if not patient:
+        raise HTTPException(404, "Assistito non trovato")
+
+    cutoff = (datetime.now(timezone.utc) - timedelta(hours=payload.hours)).isoformat()
+    entries = await db.entries.find(
+        {"patient_id": payload.patient_id, "created_at": {"$gte": cutoff}},
+        {"_id": 0},
+    ).sort("created_at", 1).to_list(500)
+
+    if not entries:
+        return {
+            "handover": f"Nelle ultime {payload.hours}h non ci sono voci di diario registrate per {patient['name']}. Nulla da segnalare.",
+            "entries_count": 0,
+        }
+
+    kind_it = {"vital": "Parametro", "medication": "Farmaco", "symptom": "Sintomo", "note": "Nota"}
+    lines = []
+    for e in entries:
+        try:
+            t = datetime.fromisoformat(e["created_at"]).strftime("%H:%M")
+        except Exception:
+            t = ""
+        val = f" {e.get('value', '')} {e.get('unit', '')}".strip()
+        lines.append(f"- [{t}] {kind_it.get(e['kind'], e['kind'])}: {e['label']}{(' — ' + val) if val else ''}")
+
+    diary_text = "\n".join(lines)
+
+    system_msg = (
+        "Sei un assistente per caregiver (familiari e badanti) che aiuta a redigere la "
+        "nota di passaggio consegne fra turni. Riassumi in italiano il diario delle ultime "
+        "ore in modo chiaro, ordinato, empatico e utile per chi prende il turno. "
+        "NON dare consigli medici, NON diagnosticare. Segnala solo quello che è stato "
+        "annotato, evidenzia eventuali sintomi o parametri anomali (senza interpretarli "
+        "clinicamente) e ricorda i farmaci somministrati. Struttura la risposta in "
+        "3-5 paragrafi brevi: 1) Riepilogo generale del turno, 2) Farmaci somministrati, "
+        "3) Parametri rilevati, 4) Sintomi/note, 5) Cosa monitorare nel prossimo turno. "
+        "Se un blocco è vuoto, ometterlo. Tono professionale ma caloroso. Max 300 parole."
+    )
+
+    user_prompt = (
+        f"Assistito: {patient['name']}"
+        f"{' — Patologia: ' + patient['pathology'] if patient.get('pathology') else ''}"
+        f"{' — Anno di nascita: ' + str(patient['birth_year']) if patient.get('birth_year') else ''}\n\n"
+        f"Diario delle ultime {payload.hours} ore:\n{diary_text}"
+    )
+
+    try:
+        chat = LlmChat(
+            api_key=os.environ["EMERGENT_LLM_KEY"],
+            session_id=f"handover-{payload.patient_id}-{int(datetime.now().timestamp())}",
+            system_message=system_msg,
+        ).with_model("anthropic", "claude-sonnet-4-6")
+
+        result = await chat.send_message(UserMessage(text=user_prompt))
+        text = result if isinstance(result, str) else str(result)
+    except Exception as ex:
+        logger.exception("AI handover failed")
+        raise HTTPException(502, f"Servizio IA non disponibile: {ex}")
+
+    return {"handover": text.strip(), "entries_count": len(entries)}
+
+
 app.include_router(api_router)
 
 app.add_middleware(

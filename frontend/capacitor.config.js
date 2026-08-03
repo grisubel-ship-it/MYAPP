@@ -3,7 +3,7 @@
  * @type {import('@capacitor/cli').CapacitorConfig}
  */
 const config = {
-  appId: 'com.caregiversync.app',
+  appId: 'com.caregiversync.assistiti',
   appName: 'Caregiver Sync',
   webDir: 'build',
   android: {

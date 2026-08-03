@@ -1,112 +1,95 @@
-# 📱 Caregiver Sync — File Android pronti
+# 📱 Caregiver Sync — Release v1.0.0 per Google Play
 
-## 🎯 File generati (v1.0.1)
+## 🎯 File pronti per la pubblicazione
 
 | File | Dimensione | Uso |
 |---|---|---|
-| **`caregiver-sync-v1.0.1.aab`** | 3.6 MB | ⭐ Da caricare su **Google Play Console** |
-| `caregiver-sync-v1.0.1.apk` | 3.8 MB | Per installare direttamente sul tuo telefono (test) |
-| `caregiver-sync-release.jks` | 2.7 KB | 🔐 **Keystore di firma — CONSERVA E FAI BACKUP!** |
+| **`caregiver-sync-v1.0.0.aab`** | 3.5 MB | ⭐ **Caricare su Google Play Console** |
+| `caregiver-sync-v1.0.0.apk` | 3.6 MB | Test diretto sul telefono (installazione manuale) |
+| `caregiver-sync-release.jks` | 2.7 KB | 🔐 **Keystore di firma — CONSERVA CON CURA** |
+| `MARKETING.md` | — | Titolo, descrizioni e testi Play Store |
+| `DATA_SAFETY.md` | — | Compilazione modulo "Sicurezza dei Dati" di Google |
+| `PRIVACY_POLICY.md` | — | Privacy policy pronta da pubblicare (GitHub Pages, Notion, ecc.) |
+| `SORGENTE_CODICE.zip` | — | Codice sorgente completo (frontend + backend) |
 
-## 🆕 Novità v1.0.1
+## 🔐 Configurazione build
 
-- ✅ **Menu contestuali `⋮`** su ogni assistito e voce di diario (pattern mobile standard)
-- ✅ **Header paziente** con menu unificato: cancellazione per categoria, svuota diario, elimina assistito — tutto in un unico posto
-- ✅ Rimossi i cestini rossi sparsi: UI più pulita e intuitiva
-- ✅ Grammatica italiana corretta ("i sintomi" invece di "i sintomo")
-- ✅ Contatore voci diario visibile in intestazione ("3 voci")
-- `versionCode` bump da 1 → 2 (necessario per aggiornare su Google Play)
+| Parametro | Valore |
+|---|---|
+| **Package name (unico)** | `com.caregiversync.assistiti` |
+| **Version code** | `1` |
+| **Version name** | `1.0.0` |
+| **minSdk** | `23` (Android 6.0+) |
+| **targetSdk** | `35` (Android 15) — soddisfa requisiti Play Store 2026 |
+| **Firma** | RSA 2048 SHA-256, valida fino al 19/12/2053 (27 anni) |
+| **Framework** | Capacitor 6 (WebView Chromium nativo) |
+| **Backend** | https://app-release-config.emergent.host |
 
-## 🔐 Credenziali keystore (COPIALE IN UN POSTO SICURO)
+## 🔑 Credenziali keystore
+
+> ⚠️ **CRITICO — SALVA IN UN POSTO SICURO (password manager + backup cloud del `.jks`)**
+> Se perdi la keystore o le password **non potrai più aggiornare l'app** su Google Play.
 
 ```
-Keystore file:  caregiver-sync-release.jks
-Alias:          caregiver-sync
-Store password: CaregiverSync2026!
-Key password:   CaregiverSync2026!
-Algoritmo:      RSA 2048, SHA256
-Validità:       27 anni (fino al 17 dic 2053)
+Keystore file:    caregiver-sync-release.jks
+Alias:            caregiver-sync
+Store password:   CGSync2026#SecureKey
+Key password:     CGSync2026#SecureKey
+Algoritmo:        RSA 2048 bit, SHA256withRSA
+Validità:         10.000 giorni (fino al 19 dicembre 2053)
 Fingerprint SHA-256:
-  59:57:C0:1B:3D:2A:19:A6:74:EF:78:0B:38:AE:C7:19:
-  1D:1F:F6:F8:FF:DF:88:2A:ED:25:A3:35:04:FB:4F:02
+  55:B2:98:5B:02:4C:9C:21:1E:3E:71:97:B6:48:3E:32:
+  25:02:4D:B9:6E:8A:B0:EC:5A:1D:54:EF:1A:EF:CE:F1
+Owner:  CN=Caregiver Sync Assistiti, OU=Mobile,
+        O=Caregiver Sync, L=Milano, ST=IT, C=IT
 ```
 
-> ⚠️ **CRITICO**: Se perdi la keystore o le password non potrai più pubblicare aggiornamenti dell'app. Salvale in un password manager (1Password, Bitwarden) e fai una copia della `.jks` in cloud (Google Drive, Dropbox).
+## 🚀 Passi per la pubblicazione su Google Play Console
 
-## 📤 Come pubblicare su Google Play
-
-### 1. Crea account Google Play Console (una tantum)
-- Vai su https://play.google.com/console
+### 1) Account (una tantum)
+- https://play.google.com/console
 - Registrazione: **25 USD una tantum**
-- Compila i tuoi dati fiscali (per app gratuite non serve pagamento setup)
+- Verifica identità con documento
 
-### 2. Crea la scheda app
-- **Crea app** → Nome: "Caregiver Sync", Lingua: Italiano, Gratuita
-- Compila (obbligatorio):
-  - **Scheda del Play Store**
-    - Descrizione breve (max 80 caratteri): *"Diario clinico condiviso per assistiti anziani e cronici"*
-    - Descrizione lunga (usa il testo suggerito dal PDF)
-    - Icona app: PNG 512×512
-    - Feature graphic: PNG 1024×500
-    - Almeno 2 screenshot: 1080×1920 (usa Android Studio emulator o `adb screencap` dal tuo telefono)
-  - **Classificazione contenuti** → completa il questionario (probabilmente "3+" o "13+")
-  - **Sicurezza dei dati** → dichiara:
-    - Raccogli dati sanitari (nome, condizioni mediche)
-    - Dati crittografati in transito ✅
-    - **Cancellazione dati disponibile in-app** ✅ (già implementata: Impostazioni → Reset totale)
-    - Nessuna condivisione con terzi
-  - **Pubblico e contenuti** → 18+ (per contenuti sanitari)
-  - **Norme sulla privacy** → serve URL pubblico
-    - Soluzione veloce: crea un file `privacy.md` su GitHub Pages con testo di privacy standard GDPR
+### 2) Crea la nuova app
+- **Crea app** → Nome: **Caregiver Sync**, Lingua principale: Italiano, App gratuita
 
-### 3. Carica l'AAB
-- Menu laterale → **Produzione** → **Crea nuova release**
-- Trascina `caregiver-sync-v1.0.1.aab`
-- Note release: *"Prima versione. Registrazione assistiti, diario clinico condiviso (parametri, farmaci, sintomi, note), cancellazione dati GDPR-compliant."*
+### 3) Compila queste sezioni (obbligatorie prima del rollout)
+| Sezione | Cosa fare |
+|---|---|
+| **Scheda del Play Store** | Usa i testi in `MARKETING.md` + carica icona 512×512, feature graphic 1024×500, ≥2 screenshot |
+| **Sicurezza dei dati** | Segui esattamente il template in `DATA_SAFETY.md` |
+| **Classificazione contenuti** | Compila il questionario (probabilmente 13+) |
+| **Pubblico e contenuti** | 18+ (contenuti sanitari) |
+| **Norme sulla privacy** | Serve URL pubblico → pubblica `PRIVACY_POLICY.md` su GitHub Pages / Notion e incolla l'URL |
+
+### 4) Upload dell'AAB
+- **Produzione** → **Crea nuova release** → trascina `caregiver-sync-v1.0.0.aab`
+- Nota release: *"Prima versione. Registrazione assistiti, diario clinico condiviso, generazione consegna con IA, cancellazione dati GDPR-compliant."*
 - Rivedi → **Avvia rollout in produzione**
 
-### 4. Attesa revisione
-- Prima revisione: **2-7 giorni lavorativi**
-- Riceverai email quando l'app è live sul Play Store
+### 5) Attesa
+Prima revisione: **2-7 giorni lavorativi**. Poi l'app appare su Google Play.
 
-## 📲 Testare l'APK sul tuo telefono (opzionale ma consigliato)
+## 📲 Testare l'APK sul telefono prima di pubblicare
 
-1. Trasferisci `caregiver-sync-v1.0.0.apk` sul tuo telefono Android (via cavo USB o email/Drive)
-2. Sul telefono: **Impostazioni** → **App** → **Accesso speciale** → **Installa app sconosciute** → attiva per il tuo file manager
-3. Apri il file APK e installa
-4. Prima di aprirlo: assicurati che il backend sia raggiungibile su https://app-release-config.emergent.host
+1. Trasferisci `caregiver-sync-v1.0.0.apk` sul tuo Android (USB / Drive / email)
+2. Impostazioni → App → Accesso speciale → Installa app sconosciute → autorizza il tuo file manager
+3. Apri il file APK dal telefono → **Installa**
+4. **IMPORTANTE**: l'app fa chiamate a `https://app-release-config.emergent.host`. Se il backend è offline, l'app mostra schermo bianco.
 
-> Nota: L'APK punta al backend di produzione. Se lo spegni, l'app mostra schermo bianco.
+## ⚙️ Ambiente di build (per riferimento)
 
-## 🔁 Come rilasciare aggiornamenti in futuro
+Il file AAB è stato compilato in questo ambiente con:
+- OpenJDK 17
+- Android Command-line Tools + Build-Tools 35.0.0 + Platform-tools
+- Capacitor 6 + AGP 8.7 + Gradle 8.11
+- `aapt2` v2.19-11948202 (via qemu-x86_64 su ARM64 host)
 
-Prima di ricompilare, modifica **`/app/frontend/android/app/build.gradle`**:
+## 🆘 Cosa NON dimenticare
 
-```gradle
-versionCode 2         // incrementa ad ogni release
-versionName "1.0.1"   // versione visibile all'utente
-```
-
-Poi rilancia (nell'ambiente Emergent, sblocchiamo l'ambiente e rifacciamo il build). Google Play richiede `versionCode` sempre crescente.
-
-## ⚙️ Configurazione tecnica applicata
-
-- **appId / applicationId**: `com.caregiversync.app`
-- **App name**: Caregiver Sync
-- **minSdkVersion**: 22 (Android 5.1+)
-- **targetSdkVersion**: 34 (Android 14)
-- **Backend URL** (impresso nel bundle): `https://app-release-config.emergent.host`
-- **Splash screen**: teal `#0F766E`, 1.2s
-- **Package**: Capacitor 6 (WebView Chromium nativo)
-- **Firma**: RSA 2048 SHA-256 (release keystore)
-
-## 🆘 Se qualcosa non va
-
-- **App si apre ma schermo bianco** → il backend non risponde. Verifica https://app-release-config.emergent.host è live.
-- **"App non installata"** all'installazione dell'APK → hai già una versione con firma diversa installata. Disinstallala prima.
-- **Google Play rifiuta l'AAB con "Missing 64-bit"** → questo AAB include già arm64-v8a via Capacitor default. Se accade, contattami.
-- **Google Play chiede la Play App Signing** → è **obbligatorio** per le nuove app: attiva "Play App Signing" e Google gestirà una chiave di upload separata. La tua keystore diventerà la chiave di upload.
-
----
-
-**File AAB pronto**: `/app/release/caregiver-sync-v1.0.1.aab` — scaricalo e caricalo su Google Play. Buona pubblicazione! 🚀
+- ✅ **Backup della keystore `.jks`** in almeno 2 posti (Drive/Dropbox + password manager)
+- ✅ Aggiornare `versionCode` (2, 3, ...) e `versionName` a ogni nuova release
+- ✅ Backend Emergent **deve rimanere online** o l'app non funziona
+- ✅ Sezione "Sicurezza dati" Play: dichiara raccolta dati sanitari + cancellazione in-app disponibile
+- ✅ Privacy policy deve avere URL pubblico stabile (no localhost, no preview URL)
