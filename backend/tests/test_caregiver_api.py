@@ -202,3 +202,139 @@ def test_wipe_all(client):
     s = client.get(f"{API}/data/stats").json()
     assert s["patients"] == 0
     assert s["entries"] == 0
+
+
+# ---------- PATCH /entries/{id} (Edit entry) ----------
+def test_patch_entry_updates_fields(client):
+    p = client.post(f"{API}/patients", json={"name": "TEST_Edit"}).json()
+    e = client.post(f"{API}/entries", json={
+        "patient_id": p["id"], "kind": "vital", "label": "Pressione", "value": "140/90", "unit": "mmHg"
+    }).json()
+
+    # Update value + unit
+    r = client.patch(f"{API}/entries/{e['id']}", json={"value": "130/80", "unit": "mmHg"})
+    assert r.status_code == 200, r.text
+    updated = r.json()
+    assert updated["value"] == "130/80"
+    assert updated["label"] == "Pressione"  # unchanged
+    assert updated["id"] == e["id"]
+
+    # Verify persistence via GET
+    lst = client.get(f"{API}/entries?patient_id={p['id']}").json()
+    assert lst[0]["value"] == "130/80"
+
+
+def test_patch_entry_empty_payload_returns_original(client):
+    p = client.post(f"{API}/patients", json={"name": "TEST_Edit2"}).json()
+    e = client.post(f"{API}/entries", json={
+        "patient_id": p["id"], "kind": "note", "label": "N1", "value": "x"
+    }).json()
+
+    r = client.patch(f"{API}/entries/{e['id']}", json={})
+    assert r.status_code == 200
+    body = r.json()
+    assert body["id"] == e["id"]
+    assert body["label"] == "N1"
+    assert body["value"] == "x"
+
+
+def test_patch_entry_not_found(client):
+    r = client.patch(f"{API}/entries/nonexistent", json={"label": "x"})
+    assert r.status_code == 404
+
+
+# ---------- Handovers history ----------
+def test_handovers_list_empty(client):
+    r = client.get(f"{API}/handovers?patient_id=nope")
+    assert r.status_code == 200
+    assert r.json() == []
+
+
+def test_handover_delete(client):
+    # Manually seed a handover doc via patient + entry, but we can't call POST /ai/handover
+    # deterministically (needs LLM). Instead we test delete endpoint via 404 path.
+    r = client.delete(f"{API}/handovers/nonexistent")
+    assert r.status_code == 404
+
+
+# ---------- Trend endpoint ----------
+def test_trend_returns_labels_when_no_label(client):
+    p = client.post(f"{API}/patients", json={"name": "TEST_Tr"}).json()
+    for label, value in [("Pressione", "145/85"), ("Pressione", "130/80"), ("Glicemia", "110")]:
+        client.post(f"{API}/entries", json={
+            "patient_id": p["id"], "kind": "vital", "label": label, "value": value, "unit": "x"
+        })
+    # note (non-vital) should not appear
+    client.post(f"{API}/entries", json={
+        "patient_id": p["id"], "kind": "note", "label": "Ignora", "value": "42"
+    })
+
+    r = client.get(f"{API}/patients/{p['id']}/trend")
+    assert r.status_code == 200
+    data = r.json()
+    assert "labels" in data
+    assert set(data["labels"]) == {"Pressione", "Glicemia"}
+
+
+def test_trend_parses_bp_value_and_value2(client):
+    p = client.post(f"{API}/patients", json={"name": "TEST_Tr2"}).json()
+    for v in ["145/85", "130/80", "150/95"]:
+        client.post(f"{API}/entries", json={
+            "patient_id": p["id"], "kind": "vital", "label": "Pressione", "value": v, "unit": "mmHg"
+        })
+
+    r = client.get(f"{API}/patients/{p['id']}/trend?label=Pressione")
+    assert r.status_code == 200
+    data = r.json()
+    assert data["label"] == "Pressione"
+    assert data["unit"] == "mmHg"
+    assert len(data["series"]) == 3
+    # First point 145/85
+    p0 = data["series"][0]
+    assert p0["value"] == 145.0
+    assert p0["value2"] == 85.0
+    assert p0["raw"] == "145/85"
+
+
+def test_trend_parses_single_number(client):
+    p = client.post(f"{API}/patients", json={"name": "TEST_Tr3"}).json()
+    for v in ["36.5", "37.2"]:
+        client.post(f"{API}/entries", json={
+            "patient_id": p["id"], "kind": "vital", "label": "Temperatura", "value": v, "unit": "°C"
+        })
+
+    r = client.get(f"{API}/patients/{p['id']}/trend?label=Temperatura")
+    assert r.status_code == 200
+    data = r.json()
+    assert len(data["series"]) == 2
+    assert data["series"][0]["value"] == 36.5
+    assert "value2" not in data["series"][0]
+
+
+def test_trend_case_insensitive_label(client):
+    p = client.post(f"{API}/patients", json={"name": "TEST_Tr4"}).json()
+    client.post(f"{API}/entries", json={
+        "patient_id": p["id"], "kind": "vital", "label": "Pressione", "value": "120/80"
+    })
+    r = client.get(f"{API}/patients/{p['id']}/trend?label=pressione")
+    assert r.status_code == 200
+    assert len(r.json()["series"]) == 1
+
+
+def test_trend_patient_not_found(client):
+    r = client.get(f"{API}/patients/nonexistent/trend")
+    assert r.status_code == 404
+
+
+def test_trend_skips_non_numeric_values(client):
+    p = client.post(f"{API}/patients", json={"name": "TEST_Tr5"}).json()
+    client.post(f"{API}/entries", json={
+        "patient_id": p["id"], "kind": "vital", "label": "Note", "value": "senza numero"
+    })
+    client.post(f"{API}/entries", json={
+        "patient_id": p["id"], "kind": "vital", "label": "Note", "value": "42"
+    })
+    r = client.get(f"{API}/patients/{p['id']}/trend?label=Note")
+    assert r.status_code == 200
+    assert len(r.json()["series"]) == 1
+    assert r.json()["series"][0]["value"] == 42.0

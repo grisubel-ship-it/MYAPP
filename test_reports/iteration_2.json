@@ -1,0 +1,34 @@
+{
+  "summary": "Iteration 2 validated the 4 new features (edit entry, handover history, vitals trend, redesigned home) plus regression of all iteration-1 delete/restore/wipe flows. Backend: 22/22 pytest tests pass (11 regression + 11 new for PATCH /entries, /handovers list+delete, /patients/{id}/trend including BP dual-value parsing, temperature single-value, case-insensitive label, 404 handling, non-numeric skipping). Frontend Playwright end-to-end: greeting text (Buon pomeriggio), quick-stats card shown only when patients>0, search filters by name and by pathology, 'Nessun risultato' state, patient card avatar initials, patient detail page loads, trend card visible with 4 BP readings showing 2 recharts lines (max+min), switching to Temperatura shows 1 line, entry ⋮ menu shows 'Modifica voce' and 'Elimina voce', edit dialog opens, saves via PATCH, persistence verified via GET, patient delete menu still works (regression).",
+  "backend_issues": {"critical": [], "minor": []},
+  "frontend_issues": {
+    "ui_bugs": [],
+    "integration_issues": [],
+    "design_issues": [
+      {"screen": "PatientDetail — trend card", "issues": ["Recharts console warning 'width(-1) height(-1)' briefly emitted on first render before ResponsiveContainer measures. Cosmetic only; chart renders correctly. Consider setting explicit minHeight on the wrapper div to silence the warning."]}
+    ]
+  },
+  "test_report_links": [
+    "/app/backend/tests/test_caregiver_api.py",
+    "/app/test_reports/pytest/pytest_results.xml"
+  ],
+  "action_items": [],
+  "critical_code_review_comments": [
+    "server.py PATCH /entries/{id}: `updates` filters out None but also silently drops empty-string values sent from the frontend (e.g. user clearing a unit). Since EntryUpdate uses exclude_unset AND the code re-filters `v is not None`, empty string '' still gets through — good. However mixing exclude_unset with `if v is not None` means a client explicitly sending null (to clear a field) is ignored. If clearing fields is desired, drop the `is not None` filter.",
+    "server.py POST /ai/handover: on LLM error it still stores nothing (good), but on success it stores handover BEFORE returning; no rollback if insert fails. Minor.",
+    "server.py trend endpoint: labels are derived only from vitals in the last `days` window, but the label filter for the series is case-insensitive while the labels list preserves original case — front-end passes labels[0] verbatim so this works. OK.",
+    "App.js is now ~1418 lines — still a single file. Splitting PatientDetail, EditEntryDialog, and PatientsList into separate modules is overdue for maintainability.",
+    "App.js EditEntryDialog: onSave fires with `kind` from the select but backend accepts arbitrary strings — no client-side guard forces one of the 4 valid enum values (Select already restricts to those 4, but there is no defensive validation).",
+    "App.js trend chart tooltip formatter uses `trendData[0]?.unit` for BOTH lines — for BP that shows 'mmHg' on both max and min which is correct, but for other multi-value labels the label 'min' would still apply. Acceptable given current schema.",
+    "App.js handover history card: cards inserted from history don't set `handoverLoading` back to false explicitly — dialog opens with text preset which is fine, but if user then clicks 'Genera' the same dialog is reused. Consider distinguishing 'viewing historical' vs 'newly generated' modes.",
+    "server.py still uses deprecated @app.on_event('shutdown') — flagged in iter 1, unchanged."
+  ],
+  "updated_files": ["/app/backend/tests/test_caregiver_api.py"],
+  "success_rate": {"backend": "100% (22/22)", "frontend": "100% (all critical flows)"},
+  "test_credentials": "none required",
+  "seed_data_creation": "All tests self-clean via /api/data/wipe (autouse fixture in backend, explicit call in frontend Playwright). No persistent seed remains.",
+  "retest_needed": false,
+  "main_agent_can_self_test": true,
+  "context_for_next_testing_agent": "Test file /app/backend/tests/test_caregiver_api.py runs 22 pytest tests in ~6s and auto-wipes the DB before each test. All new endpoints covered: PATCH /entries (update/empty/404), /handovers (list empty, delete 404), /patients/{id}/trend (labels, BP dual-value, single-value, case-insensitive, patient 404, non-numeric skip). Frontend data-testids added in iter 2: patients-title, patients-search, quick-stats, trend-card, trend-select, handover-history-card, handover-history-{id}, edit-entry-dialog, edit-entry-kind, edit-entry-label, edit-entry-value, edit-entry-unit, edit-entry-save, entry-{id}-menu-btn, entry-{id}-edit, entry-{id}-delete. Trend endpoint returns {labels: [...]} without ?label and {label, unit, series[{t,value,value2?,raw,unit}]} with ?label. Real LLM handover was NOT triggered in test to avoid flakiness/cost; POST /ai/handover storage-in-history was validated indirectly via list/delete tests.",
+  "rca of the issue": "No bugs found. Minor cosmetic recharts warning on first paint due to ResponsiveContainer measuring before layout — non-blocking."
+}

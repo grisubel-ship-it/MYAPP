@@ -58,7 +58,15 @@ La feature più amata. Al cambio turno, tocca "Genera consegna con IA": Caregive
 • Sintomi e note dei caregiver
 • Cosa monitorare nel turno successivo
 
+Ogni consegna generata viene salvata automaticamente nello **storico** dell'assistito con data e ora, così il turno entrante trova sempre l'ultima consegna a portata di mano.
+
 L'IA (basata su Claude di Anthropic) è addestrata a NON dare consigli medici o diagnosi: ti aiuta solo a organizzare e comunicare quello che i caregiver hanno annotato, in modo che nulla si perda tra un turno e l'altro.
+
+📈 GRAFICI ANDAMENTO PARAMETRI VITALI
+Vedi a colpo d'occhio come pressione, glicemia, temperatura o peso stanno cambiando nel tempo. Basta un tap sul selettore per scegliere il parametro: il grafico mostra tutti i valori degli ultimi 30 giorni, inclusi i valori doppi tipo pressione (145/85 → sia massima che minima tracciate).
+
+✏️ CORREGGI OGNI VOCE DEL DIARIO
+Hai sbagliato un valore? Dal menu `⋮` di ogni voce trovi "Modifica voce": aggiorni tipo, etichetta, valore e unità senza dover cancellare e ricreare.
 
 👥 PENSATA PER PIÙ CAREGIVER
 Familiari e badanti che si alternano vedono lo stesso diario. Basta essere connessi a Internet: le voci si sincronizzano in tempo reale.
@@ -135,7 +143,23 @@ Per generare gli screenshot in una sola volta: usa Android Studio → Device Man
 
 ---
 
-## ✍️ Note release (per la prima pubblicazione)
+## ✍️ Note release (v1.1.0)
+
+```
+Aggiornamento Caregiver Sync 1.1.0 ✨
+
+Novità:
+• 🏠 Home ridisegnata con saluto del giorno e statistiche rapide
+• 📈 Grafico andamento per pressione, glicemia, temperatura e altri parametri
+• 📚 Storico consegne IA — ogni handover generato resta salvato
+• ✏️ Modifica voci del diario dal menu ⋮ senza dover cancellare
+• 🔍 Barra di ricerca per trovare gli assistiti al volo
+• 🎨 Card assistito con avatar iniziali per un colpo d'occhio più caldo
+
+Grazie per averci scritto: molte novità arrivano dai vostri consigli.
+```
+
+## ✍️ Note release (v1.0.0 — prima pubblicazione, riferimento)
 
 ```
 Prima versione di Caregiver Sync 🎉

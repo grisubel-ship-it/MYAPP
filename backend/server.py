@@ -64,6 +64,23 @@ class EntryCreate(BaseModel):
     unit: Optional[str] = None
 
 
+class EntryUpdate(BaseModel):
+    kind: Optional[str] = None
+    label: Optional[str] = None
+    value: Optional[str] = None
+    unit: Optional[str] = None
+
+
+class Handover(BaseModel):
+    model_config = ConfigDict(extra="ignore")
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    patient_id: str
+    hours: int
+    text: str
+    entries_count: int = 0
+    created_at: str = Field(default_factory=iso_now)
+
+
 # ---------- Routes ----------
 @api_router.get("/")
 async def root():
@@ -142,6 +159,20 @@ async def delete_entry(entry_id: str):
         raise HTTPException(404, "Voce non trovata")
     await db.entries.delete_one({"id": entry_id})
     return {"deleted": True, "entry": doc}
+
+
+@api_router.patch("/entries/{entry_id}", response_model=Entry)
+async def update_entry(entry_id: str, payload: EntryUpdate):
+    """Modifica una voce esistente del diario."""
+    doc = await db.entries.find_one({"id": entry_id}, {"_id": 0})
+    if not doc:
+        raise HTTPException(404, "Voce non trovata")
+    updates = {k: v for k, v in payload.model_dump(exclude_unset=True).items() if v is not None}
+    if not updates:
+        return doc
+    updates["updated_at"] = iso_now()
+    await db.entries.update_one({"id": entry_id}, {"$set": updates})
+    return await db.entries.find_one({"id": entry_id}, {"_id": 0})
 
 
 @api_router.post("/entries/restore")
@@ -274,7 +305,87 @@ async def ai_handover(payload: HandoverRequest):
         logger.exception("AI handover failed")
         raise HTTPException(502, f"Servizio IA non disponibile: {ex}")
 
-    return {"handover": text.strip(), "entries_count": len(entries)}
+    # Salva l'handover generato per lo storico
+    handover = Handover(
+        patient_id=payload.patient_id,
+        hours=payload.hours,
+        text=text.strip(),
+        entries_count=len(entries),
+    )
+    await db.handovers.insert_one(handover.model_dump())
+
+    return {
+        "id": handover.id,
+        "handover": handover.text,
+        "entries_count": handover.entries_count,
+        "created_at": handover.created_at,
+    }
+
+
+# ----- Handovers history -----
+@api_router.get("/handovers", response_model=List[Handover])
+async def list_handovers(patient_id: Optional[str] = None, limit: int = 50):
+    query = {"patient_id": patient_id} if patient_id else {}
+    docs = await db.handovers.find(query, {"_id": 0}).sort("created_at", -1).to_list(limit)
+    return docs
+
+
+@api_router.delete("/handovers/{handover_id}")
+async def delete_handover(handover_id: str):
+    doc = await db.handovers.find_one({"id": handover_id}, {"_id": 0})
+    if not doc:
+        raise HTTPException(404, "Consegna non trovata")
+    await db.handovers.delete_one({"id": handover_id})
+    return {"deleted": True, "handover": doc}
+
+
+# ----- Trend (parametri vitali nel tempo) -----
+@api_router.get("/patients/{patient_id}/trend")
+async def patient_trend(patient_id: str, label: Optional[str] = None, days: int = 30):
+    """Ritorna una serie storica di valori numerici per un parametro vitale.
+    Se `label` non è specificato, ritorna la lista delle label disponibili."""
+    from datetime import timedelta
+    import re
+
+    if not await db.patients.find_one({"id": patient_id}):
+        raise HTTPException(404, "Paziente non trovato")
+
+    cutoff = (datetime.now(timezone.utc) - timedelta(days=days)).isoformat()
+    q = {"patient_id": patient_id, "kind": "vital", "created_at": {"$gte": cutoff}}
+    docs = await db.entries.find(q, {"_id": 0}).sort("created_at", 1).to_list(2000)
+
+    if label is None:
+        labels = sorted({d["label"] for d in docs})
+        return {"labels": labels}
+
+    def parse_num(v):
+        if not v:
+            return None
+        # Estrae il primo numero (es. "145/85" -> 145, "36.5" -> 36.5)
+        m = re.search(r"[-+]?\d*\.?\d+", str(v))
+        return float(m.group()) if m else None
+
+    def parse_second(v):
+        if not v:
+            return None
+        # Per pressione tipo "145/85" -> 85
+        m = re.findall(r"[-+]?\d*\.?\d+", str(v))
+        return float(m[1]) if len(m) > 1 else None
+
+    series = []
+    for d in docs:
+        if d["label"].lower() != label.lower():
+            continue
+        n1 = parse_num(d.get("value"))
+        n2 = parse_second(d.get("value"))
+        if n1 is None:
+            continue
+        point = {"t": d["created_at"], "value": n1, "raw": d.get("value"), "unit": d.get("unit")}
+        if n2 is not None:
+            point["value2"] = n2
+        series.append(point)
+
+    return {"label": label, "unit": (series[0]["unit"] if series else None), "series": series}
 
 
 app.include_router(api_router)

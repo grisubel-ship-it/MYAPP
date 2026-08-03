@@ -21,7 +21,23 @@ import {
   Sparkles,
   Copy,
   X,
+  Pencil,
+  History,
+  TrendingUp,
+  Search,
+  Clock,
+  ChevronRight,
 } from "lucide-react";
+import {
+  LineChart,
+  Line,
+  XAxis,
+  YAxis,
+  Tooltip,
+  ResponsiveContainer,
+  CartesianGrid,
+  Legend,
+} from "recharts";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -216,16 +232,30 @@ function Shell({ children }) {
 }
 
 // ---------- Patients List ----------
+function greeting() {
+  const h = new Date().getHours();
+  if (h < 6) return "Buonanotte";
+  if (h < 12) return "Buongiorno";
+  if (h < 18) return "Buon pomeriggio";
+  return "Buonasera";
+}
+
 function PatientsList() {
   const [patients, setPatients] = useState([]);
+  const [stats, setStats] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [query, setQuery] = useState("");
   const navigate = useNavigate();
 
   const load = async () => {
     setLoading(true);
     try {
-      const { data } = await axios.get(`${API}/patients`);
-      setPatients(data);
+      const [pRes, sRes] = await Promise.all([
+        axios.get(`${API}/patients`),
+        axios.get(`${API}/data/stats`),
+      ]);
+      setPatients(pRes.data);
+      setStats(sRes.data);
     } catch (e) {
       toast.error("Impossibile caricare l'elenco pazienti");
     } finally {
@@ -255,20 +285,73 @@ function PatientsList() {
     });
   };
 
+  const filtered = patients.filter((p) => {
+    if (!query.trim()) return true;
+    const q = query.toLowerCase();
+    return (
+      p.name.toLowerCase().includes(q) ||
+      (p.pathology ?? "").toLowerCase().includes(q)
+    );
+  });
+
+  const dateStr = new Date().toLocaleDateString("it-IT", {
+    weekday: "long",
+    day: "numeric",
+    month: "long",
+  });
+
   return (
-    <div className="space-y-5">
-      <div className="flex items-end justify-between">
-        <div>
-          <h1 className="text-3xl font-serif text-stone-900" data-testid="patients-title">Assistiti</h1>
-          <p className="text-stone-500 text-sm mt-1">
-            {patients.length === 0
-              ? "Nessun assistito registrato"
-              : `${patients.length} ${patients.length === 1 ? "assistito" : "assistiti"} in cura`}
-          </p>
+    <div className="space-y-6">
+      {/* Greeting */}
+      <div>
+        <div className="text-xs uppercase tracking-wider text-teal-700 font-semibold">
+          {dateStr}
+        </div>
+        <h1 className="text-3xl font-serif text-stone-900 mt-1" data-testid="patients-title">
+          {greeting()}
+        </h1>
+        <p className="text-stone-500 text-sm mt-1">
+          {patients.length === 0
+            ? "Registra il primo assistito per iniziare"
+            : `${patients.length} ${patients.length === 1 ? "persona" : "persone"} in cura • ${stats?.entries ?? 0} voci nel diario`}
+        </p>
+      </div>
+
+      {/* Quick stats */}
+      {stats && patients.length > 0 && (
+        <div className="grid grid-cols-4 gap-2" data-testid="quick-stats">
+          {[
+            { label: "Assistiti", value: stats.patients, icon: Users, color: "bg-teal-50 text-teal-700" },
+            { label: "Parametri", value: stats.vitals, icon: Activity, color: "bg-blue-50 text-blue-700" },
+            { label: "Farmaci", value: stats.medications, icon: Pill, color: "bg-purple-50 text-purple-700" },
+            { label: "Sintomi", value: stats.symptoms, icon: AlertCircle, color: "bg-orange-50 text-orange-700" },
+          ].map((s) => (
+            <div key={s.label} className="rounded-xl border border-stone-200 bg-white p-3">
+              <div className={`w-8 h-8 rounded-lg grid place-items-center ${s.color} mb-2`}>
+                <s.icon size={16} />
+              </div>
+              <div className="text-2xl font-serif text-stone-900 leading-none">{s.value}</div>
+              <div className="text-xs text-stone-500 mt-1">{s.label}</div>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {/* Search + CTA */}
+      <div className="flex items-center gap-2">
+        <div className="relative flex-1">
+          <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-stone-400 pointer-events-none" />
+          <Input
+            placeholder="Cerca per nome o patologia…"
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+            className="pl-9"
+            data-testid="patients-search"
+          />
         </div>
         <Button
           onClick={() => navigate("/nuovo")}
-          className="bg-teal-600 hover:bg-teal-700"
+          className="bg-teal-600 hover:bg-teal-700 shrink-0"
           data-testid="add-patient-btn"
         >
           <Plus size={16} className="mr-1" /> Nuovo
@@ -279,9 +362,16 @@ function PatientsList() {
 
       {!loading && patients.length === 0 && (
         <Card className="border-dashed">
-          <CardContent className="py-12 text-center space-y-3">
-            <Users className="mx-auto text-stone-300" size={48} />
-            <p className="text-stone-600">Registra il primo assistito per iniziare</p>
+          <CardContent className="py-16 text-center space-y-4">
+            <div className="w-20 h-20 rounded-2xl bg-teal-50 mx-auto grid place-items-center">
+              <Heart className="text-teal-600" size={36} fill="currentColor" />
+            </div>
+            <div>
+              <p className="text-stone-900 font-medium">Nessun assistito registrato</p>
+              <p className="text-stone-500 text-sm mt-1">
+                Inizia registrando la persona di cui ti stai prendendo cura
+              </p>
+            </div>
             <Button onClick={() => navigate("/nuovo")} className="bg-teal-600 hover:bg-teal-700" data-testid="empty-add-btn">
               <Plus size={16} className="mr-1" /> Aggiungi assistito
             </Button>
@@ -289,8 +379,14 @@ function PatientsList() {
         </Card>
       )}
 
+      {!loading && patients.length > 0 && filtered.length === 0 && (
+        <div className="text-stone-500 text-sm py-8 text-center">
+          Nessun risultato per "{query}"
+        </div>
+      )}
+
       <div className="grid gap-3">
-        {patients.map((p) => (
+        {filtered.map((p) => (
           <Card
             key={p.id}
             className="hover:border-teal-300 transition-colors"
@@ -298,15 +394,35 @@ function PatientsList() {
           >
             <CardContent className="p-4 flex items-center justify-between gap-3">
               <button
-                className="flex-1 text-left"
+                className="flex-1 text-left flex items-center gap-3"
                 onClick={() => navigate(`/paziente/${p.id}`)}
                 data-testid={`open-patient-${p.id}`}
               >
-                <div className="font-medium text-stone-900">{p.name}</div>
-                <div className="text-sm text-stone-500 mt-0.5 flex gap-2 items-center flex-wrap">
-                  {p.pathology && <Badge variant="secondary" className="font-normal">{p.pathology}</Badge>}
-                  {p.birth_year && <span className="text-xs">nato nel {p.birth_year}</span>}
+                <div
+                  className="w-11 h-11 rounded-xl bg-teal-100 text-teal-800 grid place-items-center font-semibold shrink-0"
+                  aria-hidden
+                >
+                  {p.name
+                    .split(" ")
+                    .map((s) => s[0])
+                    .slice(0, 2)
+                    .join("")
+                    .toUpperCase()}
                 </div>
+                <div className="min-w-0 flex-1">
+                  <div className="font-medium text-stone-900 truncate">{p.name}</div>
+                  <div className="text-sm text-stone-500 mt-0.5 flex gap-2 items-center flex-wrap">
+                    {p.pathology && (
+                      <Badge variant="secondary" className="font-normal truncate max-w-[200px]">
+                        {p.pathology}
+                      </Badge>
+                    )}
+                    {p.birth_year && (
+                      <span className="text-xs">nato nel {p.birth_year}</span>
+                    )}
+                  </div>
+                </div>
+                <ChevronRight size={18} className="text-stone-300 shrink-0" />
               </button>
               <ItemMenu
                 testId={`patient-${p.id}`}
@@ -448,20 +564,46 @@ function PatientDetail() {
   const [handoverLoading, setHandoverLoading] = useState(false);
   const [handoverText, setHandoverText] = useState("");
   const [handoverHours, setHandoverHours] = useState(24);
+  const [handovers, setHandovers] = useState([]);
+  const [historyOpen, setHistoryOpen] = useState(false);
+  const [editingEntry, setEditingEntry] = useState(null);
+  const [trendLabels, setTrendLabels] = useState([]);
+  const [trendSelected, setTrendSelected] = useState(null);
+  const [trendData, setTrendData] = useState([]);
 
   const load = async () => {
     try {
-      const [pRes, eRes] = await Promise.all([
+      const [pRes, eRes, hRes, trendRes] = await Promise.all([
         axios.get(`${API}/patients/${id}`),
         axios.get(`${API}/entries?patient_id=${id}`),
+        axios.get(`${API}/handovers?patient_id=${id}`),
+        axios.get(`${API}/patients/${id}/trend`),
       ]);
       setPatient(pRes.data);
       setEntries(eRes.data);
+      setHandovers(hRes.data);
+      const labels = trendRes.data.labels || [];
+      setTrendLabels(labels);
+      if (labels.length > 0 && !trendSelected) {
+        setTrendSelected(labels[0]);
+      }
     } catch {
       toast.error("Assistito non trovato");
       navigate("/");
     }
   };
+
+  // Carica la serie storica quando cambia il parametro selezionato
+  useEffect(() => {
+    if (!trendSelected) {
+      setTrendData([]);
+      return;
+    }
+    axios
+      .get(`${API}/patients/${id}/trend?label=${encodeURIComponent(trendSelected)}&days=30`)
+      .then(({ data }) => setTrendData(data.series || []))
+      .catch(() => setTrendData([]));
+  }, [id, trendSelected]);
 
   useEffect(() => {
     load();
@@ -538,6 +680,33 @@ function PatientDetail() {
     } catch {
       toast.error("Impossibile copiare");
     }
+  };
+
+  const saveEditedEntry = async (patch) => {
+    try {
+      await axios.patch(`${API}/entries/${editingEntry.id}`, patch);
+      toast.success("Voce aggiornata");
+      setEditingEntry(null);
+      load();
+    } catch {
+      toast.error("Errore nel salvataggio");
+    }
+  };
+
+  const deleteHandover = async (handover) => {
+    try {
+      await axios.delete(`${API}/handovers/${handover.id}`);
+      setHandovers((prev) => prev.filter((h) => h.id !== handover.id));
+      toast.success("Consegna eliminata");
+    } catch {
+      toast.error("Errore");
+    }
+  };
+
+  const openHandoverFromHistory = (h) => {
+    setHandoverText(h.text);
+    setHandoverHours(h.hours);
+    setHandoverOpen(true);
   };
 
   if (!patient) return <div className="text-stone-500">Caricamento…</div>;
@@ -674,6 +843,158 @@ function PatientDetail() {
         </CardContent>
       </Card>
 
+      {/* Handover history + trend */}
+      {(handovers.length > 0 || trendLabels.length > 0) && (
+        <div className="grid gap-3 md:grid-cols-2">
+          {/* Handover history */}
+          {handovers.length > 0 && (
+            <Card data-testid="handover-history-card">
+              <CardHeader className="pb-2">
+                <div className="flex items-center justify-between">
+                  <CardTitle className="text-base flex items-center gap-2">
+                    <History size={16} className="text-teal-600" /> Consegne generate
+                  </CardTitle>
+                  <Badge variant="secondary" className="font-normal">
+                    {handovers.length}
+                  </Badge>
+                </div>
+              </CardHeader>
+              <CardContent className="space-y-2 max-h-[240px] overflow-y-auto pr-1">
+                {handovers.slice(0, 6).map((h) => (
+                  <div
+                    key={h.id}
+                    className="flex items-start gap-2 group p-2 -mx-2 rounded-lg hover:bg-stone-50 cursor-pointer"
+                    onClick={() => openHandoverFromHistory(h)}
+                    data-testid={`handover-history-${h.id}`}
+                  >
+                    <div className="w-8 h-8 rounded-lg bg-teal-50 text-teal-700 grid place-items-center shrink-0">
+                      <Sparkles size={14} />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <div className="text-xs text-stone-500 flex items-center gap-1">
+                        <Clock size={11} />
+                        {new Date(h.created_at).toLocaleString("it-IT", {
+                          day: "numeric",
+                          month: "short",
+                          hour: "2-digit",
+                          minute: "2-digit",
+                        })}
+                        <span className="text-stone-400 ml-1">• {h.hours}h • {h.entries_count} voci</span>
+                      </div>
+                      <div className="text-sm text-stone-800 mt-0.5 line-clamp-2">
+                        {h.text.replace(/[#*_`]/g, "").slice(0, 130)}…
+                      </div>
+                    </div>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="opacity-0 group-hover:opacity-100 text-red-600 h-7 w-7 shrink-0"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        deleteHandover(h);
+                      }}
+                      aria-label="Elimina consegna"
+                    >
+                      <Trash2 size={13} />
+                    </Button>
+                  </div>
+                ))}
+                {handovers.length > 6 && (
+                  <p className="text-xs text-stone-400 text-center pt-1">
+                    +{handovers.length - 6} consegne precedenti
+                  </p>
+                )}
+              </CardContent>
+            </Card>
+          )}
+
+          {/* Trend chart */}
+          {trendLabels.length > 0 && (
+            <Card data-testid="trend-card">
+              <CardHeader className="pb-2">
+                <div className="flex items-center justify-between gap-2">
+                  <CardTitle className="text-base flex items-center gap-2">
+                    <TrendingUp size={16} className="text-teal-600" /> Andamento
+                  </CardTitle>
+                  <Select value={trendSelected ?? ""} onValueChange={setTrendSelected}>
+                    <SelectTrigger className="w-[150px] h-8" data-testid="trend-select">
+                      <SelectValue placeholder="Parametro" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {trendLabels.map((l) => (
+                        <SelectItem key={l} value={l}>
+                          {l}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              </CardHeader>
+              <CardContent className="pt-0">
+                {trendData.length === 0 ? (
+                  <div className="text-xs text-stone-400 text-center py-8">
+                    Servono almeno 2 rilevazioni con valore numerico
+                  </div>
+                ) : (
+                  <div className="h-[180px] -ml-3">
+                    <ResponsiveContainer width="100%" height="100%">
+                      <LineChart
+                        data={trendData.map((p) => ({
+                          ...p,
+                          time: new Date(p.t).getTime(),
+                        }))}
+                      >
+                        <CartesianGrid strokeDasharray="3 3" stroke="#e7e5e4" />
+                        <XAxis
+                          dataKey="time"
+                          type="number"
+                          domain={["dataMin", "dataMax"]}
+                          tickFormatter={(t) =>
+                            new Date(t).toLocaleDateString("it-IT", {
+                              day: "numeric",
+                              month: "short",
+                            })
+                          }
+                          fontSize={10}
+                          stroke="#78716c"
+                        />
+                        <YAxis fontSize={10} stroke="#78716c" width={30} />
+                        <Tooltip
+                          labelFormatter={(t) =>
+                            new Date(t).toLocaleString("it-IT")
+                          }
+                          formatter={(v, n) => [`${v}${trendData[0]?.unit ? ' ' + trendData[0].unit : ''}`, n === "value2" ? "min" : "max"]}
+                          contentStyle={{ fontSize: 12, borderRadius: 8 }}
+                        />
+                        <Line
+                          type="monotone"
+                          dataKey="value"
+                          stroke="#0f766e"
+                          strokeWidth={2}
+                          dot={{ fill: "#0f766e", r: 3 }}
+                          name={trendSelected}
+                        />
+                        {trendData.some((d) => d.value2 != null) && (
+                          <Line
+                            type="monotone"
+                            dataKey="value2"
+                            stroke="#0891b2"
+                            strokeWidth={2}
+                            strokeDasharray="4 4"
+                            dot={{ fill: "#0891b2", r: 3 }}
+                            name="min"
+                          />
+                        )}
+                      </LineChart>
+                    </ResponsiveContainer>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          )}
+        </div>
+      )}
+
       {/* Add entry form */}
       <Card>
         <CardHeader>
@@ -759,6 +1080,13 @@ function PatientDetail() {
                 ariaLabel="Azioni voce"
                 actions={[
                   {
+                    key: "edit",
+                    text: "Modifica voce",
+                    icon: Pencil,
+                    onSelect: () => setEditingEntry(e),
+                  },
+                  { separator: true },
+                  {
                     key: "delete",
                     text: "Elimina voce",
                     icon: Trash2,
@@ -824,7 +1152,109 @@ function PatientDetail() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      {/* Edit Entry Dialog */}
+      <EditEntryDialog
+        entry={editingEntry}
+        onClose={() => setEditingEntry(null)}
+        onSave={saveEditedEntry}
+      />
     </div>
+  );
+}
+
+// ---------- Edit Entry Dialog ----------
+function EditEntryDialog({ entry, onClose, onSave }) {
+  const [form, setForm] = useState({ kind: "", label: "", value: "", unit: "" });
+
+  useEffect(() => {
+    if (entry) {
+      setForm({
+        kind: entry.kind,
+        label: entry.label ?? "",
+        value: entry.value ?? "",
+        unit: entry.unit ?? "",
+      });
+    }
+  }, [entry]);
+
+  if (!entry) return null;
+
+  const submit = (e) => {
+    e.preventDefault();
+    if (!form.label.trim()) {
+      toast.error("L'etichetta è obbligatoria");
+      return;
+    }
+    onSave(form);
+  };
+
+  return (
+    <Dialog open={!!entry} onOpenChange={(o) => !o && onClose()}>
+      <DialogContent data-testid="edit-entry-dialog">
+        <DialogHeader>
+          <DialogTitle className="flex items-center gap-2">
+            <Pencil size={16} className="text-teal-600" /> Modifica voce del diario
+          </DialogTitle>
+          <DialogDescription>
+            Correggi i valori. La data e l'ora originali vengono mantenute.
+          </DialogDescription>
+        </DialogHeader>
+        <form onSubmit={submit} className="space-y-3 py-2">
+          <div>
+            <Label htmlFor="edit-kind">Tipo</Label>
+            <Select value={form.kind} onValueChange={(v) => setForm({ ...form, kind: v })}>
+              <SelectTrigger id="edit-kind" data-testid="edit-entry-kind">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="vital">Parametro</SelectItem>
+                <SelectItem value="medication">Farmaco</SelectItem>
+                <SelectItem value="symptom">Sintomo</SelectItem>
+                <SelectItem value="note">Nota</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+          <div>
+            <Label htmlFor="edit-label">Etichetta</Label>
+            <Input
+              id="edit-label"
+              value={form.label}
+              onChange={(e) => setForm({ ...form, label: e.target.value })}
+              data-testid="edit-entry-label"
+            />
+          </div>
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <Label htmlFor="edit-value">Valore</Label>
+              <Input
+                id="edit-value"
+                value={form.value}
+                onChange={(e) => setForm({ ...form, value: e.target.value })}
+                data-testid="edit-entry-value"
+              />
+            </div>
+            <div>
+              <Label htmlFor="edit-unit">Unità</Label>
+              <Input
+                id="edit-unit"
+                value={form.unit}
+                onChange={(e) => setForm({ ...form, unit: e.target.value })}
+                data-testid="edit-entry-unit"
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button type="button" variant="outline" onClick={onClose}>
+              Annulla
+            </Button>
+            <Button type="submit" className="bg-teal-600 hover:bg-teal-700" data-testid="edit-entry-save">
+              Salva modifiche
+            </Button>
+          </DialogFooter>
+        </form>
+      </DialogContent>
+    </Dialog>
   );
 }
 

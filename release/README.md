@@ -1,24 +1,33 @@
 # 📱 Caregiver Sync — Release v1.0.0 per Google Play
 
-## 🎯 File pronti per la pubblicazione
+## 🎯 File pronti per la pubblicazione (v1.1.0)
 
 | File | Dimensione | Uso |
 |---|---|---|
-| **`caregiver-sync-v1.0.0.aab`** | 3.5 MB | ⭐ **Caricare su Google Play Console** |
-| `caregiver-sync-v1.0.0.apk` | 3.6 MB | Test diretto sul telefono (installazione manuale) |
+| **`caregiver-sync-v1.1.0.aab`** | 4.1 MB | ⭐ **Caricare su Google Play Console** |
+| `caregiver-sync-v1.1.0.apk` | 4.2 MB | Test diretto sul telefono (installazione manuale) |
 | `caregiver-sync-release.jks` | 2.7 KB | 🔐 **Keystore di firma — CONSERVA CON CURA** |
 | `MARKETING.md` | — | Titolo, descrizioni e testi Play Store |
 | `DATA_SAFETY.md` | — | Compilazione modulo "Sicurezza dei Dati" di Google |
 | `PRIVACY_POLICY.md` | — | Privacy policy pronta da pubblicare (GitHub Pages, Notion, ecc.) |
 | `SORGENTE_CODICE.zip` | — | Codice sorgente completo (frontend + backend) |
 
+## 🆕 Novità v1.1.0 rispetto a v1.0.0
+
+- ✅ **Home ridisegnata** con saluto contestuale (buongiorno/pomeriggio/sera), data del giorno, quick stats (assistiti, parametri, farmaci, sintomi) e barra di ricerca
+- ✅ **Card assistito** con avatar iniziali (es. "MR" per Maria Rossi) e chevron per apertura più veloce
+- ✅ **Modifica voce diario** dal menu `⋮` → "Modifica voce" → dialog con tipo/etichetta/valore/unità
+- ✅ **Storico consegne IA** salvato automaticamente — ogni handover generato resta consultabile con timestamp e preview
+- ✅ **Grafico Andamento parametri vitali** (recharts) — trend visivo di pressione/glicemia/temperatura negli ultimi 30 giorni, con supporto min/max (es. 145/85 mmHg tracciato come 2 linee)
+- ✅ Nuovi endpoint API: `PATCH /entries/{id}`, `GET/DELETE /handovers`, `GET /patients/{id}/trend`
+
 ## 🔐 Configurazione build
 
 | Parametro | Valore |
 |---|---|
 | **Package name (unico)** | `com.caregiversync.assistiti` |
-| **Version code** | `1` |
-| **Version name** | `1.0.0` |
+| **Version code** | `2` |
+| **Version name** | `1.1.0` |
 | **minSdk** | `23` (Android 6.0+) |
 | **targetSdk** | `35` (Android 15) — soddisfa requisiti Play Store 2026 |
 | **Firma** | RSA 2048 SHA-256, valida fino al 19/12/2053 (27 anni) |
@@ -64,7 +73,7 @@ Owner:  CN=Caregiver Sync Assistiti, OU=Mobile,
 | **Norme sulla privacy** | Serve URL pubblico → pubblica `PRIVACY_POLICY.md` su GitHub Pages / Notion e incolla l'URL |
 
 ### 4) Upload dell'AAB
-- **Produzione** → **Crea nuova release** → trascina `caregiver-sync-v1.0.0.aab`
+- **Produzione** → **Crea nuova release** → trascina `caregiver-sync-v1.1.0.aab`
 - Nota release: *"Prima versione. Registrazione assistiti, diario clinico condiviso, generazione consegna con IA, cancellazione dati GDPR-compliant."*
 - Rivedi → **Avvia rollout in produzione**
 
@@ -73,7 +82,7 @@ Prima revisione: **2-7 giorni lavorativi**. Poi l'app appare su Google Play.
 
 ## 📲 Testare l'APK sul telefono prima di pubblicare
 
-1. Trasferisci `caregiver-sync-v1.0.0.apk` sul tuo Android (USB / Drive / email)
+1. Trasferisci `caregiver-sync-v1.1.0.apk` sul tuo Android (USB / Drive / email)
 2. Impostazioni → App → Accesso speciale → Installa app sconosciute → autorizza il tuo file manager
 3. Apri il file APK dal telefono → **Installa**
 4. **IMPORTANTE**: l'app fa chiamate a `https://app-release-config.emergent.host`. Se il backend è offline, l'app mostra schermo bianco.
