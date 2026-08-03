@@ -936,8 +936,8 @@ function PatientDetail() {
                     Servono almeno 2 rilevazioni con valore numerico
                   </div>
                 ) : (
-                  <div className="h-[180px] -ml-3">
-                    <ResponsiveContainer width="100%" height="100%">
+                  <div className="h-[180px] -ml-3" style={{ minHeight: 180 }}>
+                    <ResponsiveContainer width="100%" height="100%" minWidth={0}>
                       <LineChart
                         data={trendData.map((p) => ({
                           ...p,
