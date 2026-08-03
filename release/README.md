@@ -1,12 +1,21 @@
 # 📱 Caregiver Sync — File Android pronti
 
-## 🎯 File generati
+## 🎯 File generati (v1.0.1)
 
 | File | Dimensione | Uso |
 |---|---|---|
-| **`caregiver-sync-v1.0.0.aab`** | 3.5 MB | ⭐ Da caricare su **Google Play Console** |
-| `caregiver-sync-v1.0.0.apk` | 3.6 MB | Per installare direttamente sul tuo telefono (test) |
+| **`caregiver-sync-v1.0.1.aab`** | 3.6 MB | ⭐ Da caricare su **Google Play Console** |
+| `caregiver-sync-v1.0.1.apk` | 3.8 MB | Per installare direttamente sul tuo telefono (test) |
 | `caregiver-sync-release.jks` | 2.7 KB | 🔐 **Keystore di firma — CONSERVA E FAI BACKUP!** |
+
+## 🆕 Novità v1.0.1
+
+- ✅ **Menu contestuali `⋮`** su ogni assistito e voce di diario (pattern mobile standard)
+- ✅ **Header paziente** con menu unificato: cancellazione per categoria, svuota diario, elimina assistito — tutto in un unico posto
+- ✅ Rimossi i cestini rossi sparsi: UI più pulita e intuitiva
+- ✅ Grammatica italiana corretta ("i sintomi" invece di "i sintomo")
+- ✅ Contatore voci diario visibile in intestazione ("3 voci")
+- `versionCode` bump da 1 → 2 (necessario per aggiornare su Google Play)
 
 ## 🔐 Credenziali keystore (COPIALE IN UN POSTO SICURO)
 
@@ -52,7 +61,7 @@ Fingerprint SHA-256:
 
 ### 3. Carica l'AAB
 - Menu laterale → **Produzione** → **Crea nuova release**
-- Trascina `caregiver-sync-v1.0.0.aab`
+- Trascina `caregiver-sync-v1.0.1.aab`
 - Note release: *"Prima versione. Registrazione assistiti, diario clinico condiviso (parametri, farmaci, sintomi, note), cancellazione dati GDPR-compliant."*
 - Rivedi → **Avvia rollout in produzione**
 
@@ -100,4 +109,4 @@ Poi rilancia (nell'ambiente Emergent, sblocchiamo l'ambiente e rifacciamo il bui
 
 ---
 
-**File AAB pronto**: `/app/release/caregiver-sync-v1.0.0.aab` — scaricalo e caricalo su Google Play. Buona pubblicazione! 🚀
+**File AAB pronto**: `/app/release/caregiver-sync-v1.0.1.aab` — scaricalo e caricalo su Google Play. Buona pubblicazione! 🚀

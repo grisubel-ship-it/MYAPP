@@ -15,6 +15,9 @@ import {
   StickyNote,
   Undo2,
   Heart,
+  MoreVertical,
+  Eraser,
+  ListX,
 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
@@ -41,6 +44,14 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 const API = `${process.env.REACT_APP_BACKEND_URL}/api`;
 
@@ -84,6 +95,84 @@ function ConfirmDialog({ trigger, title, description, confirmText = "Elimina", o
         </AlertDialogFooter>
       </AlertDialogContent>
     </AlertDialog>
+  );
+}
+
+// ---------- Context Menu wrapper ----------
+// Ogni azione distruttiva è dentro un DropdownMenu (…) + un AlertDialog di conferma.
+// Usiamo state controllato per collegare i due componenti in modo affidabile.
+function ItemMenu({ testId, ariaLabel = "Azioni", size = "icon", actions }) {
+  const [openDialog, setOpenDialog] = useState(null); // key dell'action con conferma aperta
+
+  const current = actions.find((a) => a.key === openDialog);
+
+  return (
+    <>
+      <DropdownMenu>
+        <DropdownMenuTrigger asChild>
+          <Button
+            variant="ghost"
+            size={size}
+            aria-label={ariaLabel}
+            data-testid={`${testId}-menu-btn`}
+            className="text-stone-500 hover:text-stone-900"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <MoreVertical size={18} />
+          </Button>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent align="end" data-testid={`${testId}-menu`}>
+          {actions.map((a, i) =>
+            a.separator ? (
+              <DropdownMenuSeparator key={`sep-${i}`} />
+            ) : a.label ? (
+              <DropdownMenuLabel key={a.key ?? i} className="text-xs text-stone-500">
+                {a.label}
+              </DropdownMenuLabel>
+            ) : (
+              <DropdownMenuItem
+                key={a.key}
+                data-testid={`${testId}-${a.key}`}
+                onClick={() => {
+                  if (a.confirm) setOpenDialog(a.key);
+                  else a.onSelect?.();
+                }}
+                className={a.destructive ? "text-red-600 focus:text-red-700 focus:bg-red-50" : ""}
+              >
+                {a.icon && <a.icon size={14} className="mr-2" />}
+                {a.text}
+              </DropdownMenuItem>
+            )
+          )}
+        </DropdownMenuContent>
+      </DropdownMenu>
+
+      {current?.confirm && (
+        <AlertDialog open={true} onOpenChange={(o) => !o && setOpenDialog(null)}>
+          <AlertDialogContent data-testid={`${testId}-${current.key}-dialog`}>
+            <AlertDialogHeader>
+              <AlertDialogTitle>{current.confirm.title}</AlertDialogTitle>
+              <AlertDialogDescription>{current.confirm.description}</AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel data-testid={`${testId}-${current.key}-cancel`}>
+                Annulla
+              </AlertDialogCancel>
+              <AlertDialogAction
+                data-testid={`${testId}-${current.key}-confirm`}
+                onClick={() => {
+                  current.onSelect?.();
+                  setOpenDialog(null);
+                }}
+                className={current.destructive ? "bg-red-600 hover:bg-red-700 text-white" : ""}
+              >
+                {current.confirm.confirmText ?? "Conferma"}
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
+      )}
+    </>
   );
 }
 
@@ -208,23 +297,31 @@ function PatientsList() {
                   {p.birth_year && <span className="text-xs">nato nel {p.birth_year}</span>}
                 </div>
               </button>
-              <ConfirmDialog
-                testId={`delete-patient-${p.id}`}
-                title={`Eliminare ${p.name}?`}
-                description="Verranno eliminati anche tutti i dati clinici associati (parametri, farmaci, sintomi, note). Avrai 5 secondi per annullare."
-                confirmText="Elimina assistito"
-                onConfirm={() => handleDelete(p)}
-                trigger={
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    className="text-red-600 hover:text-red-700 hover:bg-red-50"
-                    aria-label="Elimina"
-                    data-testid={`delete-patient-${p.id}-btn`}
-                  >
-                    <Trash2 size={18} />
-                  </Button>
-                }
+              <ItemMenu
+                testId={`patient-${p.id}`}
+                ariaLabel={`Azioni per ${p.name}`}
+                actions={[
+                  {
+                    key: "open",
+                    text: "Apri scheda",
+                    icon: ChevronLeft,
+                    onSelect: () => navigate(`/paziente/${p.id}`),
+                  },
+                  { separator: true },
+                  {
+                    key: "delete",
+                    text: "Elimina assistito",
+                    icon: Trash2,
+                    destructive: true,
+                    confirm: {
+                      title: `Eliminare ${p.name}?`,
+                      description:
+                        "Verranno eliminati anche tutti i dati clinici associati. Avrai 5 secondi per annullare dal toast.",
+                      confirmText: "Elimina",
+                    },
+                    onSelect: () => handleDelete(p),
+                  },
+                ]}
               />
             </CardContent>
           </Card>
@@ -324,10 +421,10 @@ function NewPatient() {
 
 // ---------- Patient Detail (diary) ----------
 const KIND_META = {
-  vital: { label: "Parametro", icon: Activity, color: "text-blue-600 bg-blue-50" },
-  medication: { label: "Farmaco", icon: Pill, color: "text-purple-600 bg-purple-50" },
-  symptom: { label: "Sintomo", icon: AlertCircle, color: "text-orange-600 bg-orange-50" },
-  note: { label: "Nota", icon: StickyNote, color: "text-stone-600 bg-stone-100" },
+  vital: { label: "Parametro", plural: "parametri", icon: Activity, color: "text-blue-600 bg-blue-50" },
+  medication: { label: "Farmaco", plural: "farmaci", icon: Pill, color: "text-purple-600 bg-purple-50" },
+  symptom: { label: "Sintomo", plural: "sintomi", icon: AlertCircle, color: "text-orange-600 bg-orange-50" },
+  note: { label: "Nota", plural: "note", icon: StickyNote, color: "text-stone-600 bg-stone-100" },
 };
 
 function PatientDetail() {
@@ -423,6 +520,78 @@ function PatientDetail() {
             <p className="mt-3 text-stone-600 text-sm max-w-xl whitespace-pre-wrap">{patient.notes}</p>
           )}
         </div>
+        <ItemMenu
+          testId="patient-header"
+          ariaLabel="Azioni assistito"
+          actions={[
+            { label: "Azioni sul diario" },
+            ...Object.entries(counts).map(([kind, count]) => ({
+              key: `bulk-${kind}`,
+              text: `Cancella tutti i ${KIND_META[kind]?.plural ?? "elementi"} (${count})`,
+              icon: ListX,
+              destructive: true,
+              confirm: {
+                title: `Cancellare tutti i ${KIND_META[kind]?.plural ?? "elementi"}?`,
+                description: `Verranno eliminate ${count} voci di questo tipo per ${patient.name}. L'operazione non è annullabile.`,
+                confirmText: "Cancella",
+              },
+              onSelect: () => bulkDelete(kind),
+            })),
+            ...(entries.length > 0
+              ? [
+                  {
+                    key: "clear-diary",
+                    text: "Svuota tutto il diario",
+                    icon: Eraser,
+                    destructive: true,
+                    confirm: {
+                      title: `Svuotare tutto il diario di ${patient.name}?`,
+                      description: `Verranno eliminate tutte le ${entries.length} voci registrate. L'assistito rimane. Operazione non annullabile.`,
+                      confirmText: "Svuota diario",
+                    },
+                    onSelect: async () => {
+                      try {
+                        await axios.post(`${API}/entries/bulk-delete`, { patient_id: id });
+                        toast.success("Diario svuotato");
+                        load();
+                      } catch {
+                        toast.error("Errore");
+                      }
+                    },
+                  },
+                ]
+              : []),
+            { separator: true },
+            {
+              key: "delete-patient",
+              text: "Elimina assistito",
+              icon: Trash2,
+              destructive: true,
+              confirm: {
+                title: `Eliminare ${patient.name}?`,
+                description:
+                  "Verranno eliminati anche tutti i dati clinici associati. Avrai 5 secondi per annullare.",
+                confirmText: "Elimina",
+              },
+              onSelect: async () => {
+                await deleteWithUndo({
+                  label: `Assistito ${patient.name}`,
+                  doDelete: async () => {
+                    const { data } = await axios.delete(`${API}/patients/${id}`);
+                    return data;
+                  },
+                  doRestore: async (removed) => {
+                    await axios.post(`${API}/patients/restore`, {
+                      patient: removed.patient,
+                      entries: removed.entries,
+                    });
+                  },
+                });
+                navigate("/");
+              },
+            },
+          ]}
+        />
       </div>
 
       {/* Add entry form */}
@@ -467,32 +636,16 @@ function PatientDetail() {
         </CardContent>
       </Card>
 
-      {/* Bulk delete by kind */}
-      {entries.length > 0 && (
-        <div className="flex gap-2 flex-wrap items-center text-sm">
-          <span className="text-stone-500">Cancella in massa:</span>
-          {Object.entries(counts).map(([kind, count]) => (
-            <ConfirmDialog
-              key={kind}
-              testId={`bulk-delete-${kind}`}
-              title={`Cancellare tutti i ${KIND_META[kind]?.label.toLowerCase() ?? "voci"}?`}
-              description={`Verranno eliminati ${count} voci di questo tipo per ${patient.name}. L'operazione non è annullabile.`}
-              confirmText="Cancella"
-              onConfirm={() => bulkDelete(kind)}
-              trigger={
-                <Button variant="outline" size="sm" data-testid={`bulk-delete-${kind}-btn`}>
-                  <Trash2 size={14} className="mr-1" />
-                  {KIND_META[kind]?.label ?? kind} ({count})
-                </Button>
-              }
-            />
-          ))}
-        </div>
-      )}
-
       {/* Entries list */}
       <div className="space-y-2">
-        <h2 className="text-lg font-semibold text-stone-800">Diario clinico</h2>
+        <div className="flex items-center justify-between">
+          <h2 className="text-lg font-semibold text-stone-800">Diario clinico</h2>
+          {entries.length > 0 && (
+            <span className="text-xs text-stone-500" data-testid="entries-count">
+              {entries.length} {entries.length === 1 ? "voce" : "voci"}
+            </span>
+          )}
+        </div>
         {entries.length === 0 && (
           <div className="text-stone-500 text-sm py-8 text-center bg-white rounded-lg border border-dashed">
             Nessuna voce registrata. Aggiungi la prima usando il form sopra.
@@ -521,22 +674,23 @@ function PatientDetail() {
                   )}
                 </div>
               </div>
-              <ConfirmDialog
-                testId={`delete-entry-${e.id}`}
-                title="Eliminare questa voce?"
-                description="Puoi annullare l'operazione entro 5 secondi dal toast."
-                onConfirm={() => handleDeleteEntry(e)}
-                trigger={
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    className="text-red-600 hover:bg-red-50"
-                    aria-label="Elimina voce"
-                    data-testid={`delete-entry-${e.id}-btn`}
-                  >
-                    <Trash2 size={16} />
-                  </Button>
-                }
+              <ItemMenu
+                testId={`entry-${e.id}`}
+                ariaLabel="Azioni voce"
+                actions={[
+                  {
+                    key: "delete",
+                    text: "Elimina voce",
+                    icon: Trash2,
+                    destructive: true,
+                    confirm: {
+                      title: "Eliminare questa voce?",
+                      description: "Puoi annullare l'operazione entro 5 secondi dal toast.",
+                      confirmText: "Elimina",
+                    },
+                    onSelect: () => handleDeleteEntry(e),
+                  },
+                ]}
               />
             </div>
           );
