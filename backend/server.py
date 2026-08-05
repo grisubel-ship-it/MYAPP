@@ -1,4 +1,5 @@
 from fastapi import FastAPI, APIRouter, HTTPException, status
+from fastapi.responses import FileResponse
 from dotenv import load_dotenv
 from starlette.middleware.cors import CORSMiddleware
 from motor.motor_asyncio import AsyncIOMotorClient
@@ -386,6 +387,54 @@ async def patient_trend(patient_id: str, label: Optional[str] = None, days: int 
         series.append(point)
 
     return {"label": label, "unit": (series[0]["unit"] if series else None), "series": series}
+
+
+# ----- Static release downloads -----
+RELEASE_DIR = Path("/app/release")
+ALLOWED_DOWNLOADS = {
+    "google-play-kit.zip": "application/zip",
+    "caregiver-sync-v1.1.1.aab": "application/octet-stream",
+    "caregiver-sync-v1.1.1.apk": "application/vnd.android.package-archive",
+    "caregiver-sync-release.jks": "application/octet-stream",
+    "screenshots.zip": "application/zip",
+    "SORGENTE_CODICE.zip": "application/zip",
+    "README.md": "text/markdown; charset=utf-8",
+    "PLAY_CONSOLE_CHECKLIST.md": "text/markdown; charset=utf-8",
+    "MARKETING.md": "text/markdown; charset=utf-8",
+    "DATA_SAFETY.md": "text/markdown; charset=utf-8",
+    "PRIVACY_POLICY.md": "text/markdown; charset=utf-8",
+}
+
+
+@api_router.get("/download/{filename}")
+async def download_release_file(filename: str):
+    """Scarica un file di release. Whitelist per sicurezza."""
+    if filename not in ALLOWED_DOWNLOADS:
+        raise HTTPException(404, "File non disponibile")
+    file_path = RELEASE_DIR / filename
+    if not file_path.exists():
+        raise HTTPException(404, "File non trovato sul server")
+    return FileResponse(
+        path=str(file_path),
+        media_type=ALLOWED_DOWNLOADS[filename],
+        filename=filename,
+    )
+
+
+@api_router.get("/downloads")
+async def list_downloads():
+    """Elenco leggibile dei file scaricabili con URL diretti."""
+    base = os.environ.get("PUBLIC_URL", "").rstrip("/")
+    items = []
+    for name in ALLOWED_DOWNLOADS:
+        f = RELEASE_DIR / name
+        if f.exists():
+            items.append({
+                "name": name,
+                "size_bytes": f.stat().st_size,
+                "url": f"{base}/api/download/{name}" if base else f"/api/download/{name}",
+            })
+    return {"files": items}
 
 
 app.include_router(api_router)
