@@ -11,6 +11,8 @@
 | `DATA_SAFETY.md` | — | Compilazione modulo "Sicurezza dei Dati" di Google |
 | `PRIVACY_POLICY.md` | — | Privacy policy pronta da pubblicare (GitHub Pages, Notion, ecc.) |
 | `SORGENTE_CODICE.zip` | — | Codice sorgente completo (frontend + backend) |
+| **`screenshots/`** | — | 5 screenshot 1080×1920 pronti da caricare in Play Console |
+| `screenshots.zip` | 1.6 MB | Stessa cartella zippata per download rapido |
 
 ## 🆕 Novità v1.1.0 rispetto a v1.0.0
 
