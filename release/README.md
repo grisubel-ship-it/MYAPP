@@ -4,14 +4,15 @@
 
 | File | Dimensione | Uso |
 |---|---|---|
-| **`caregiver-sync-v1.1.0.aab`** | 4.1 MB | ⭐ **Caricare su Google Play Console** |
-| `caregiver-sync-v1.1.0.apk` | 4.2 MB | Test diretto sul telefono (installazione manuale) |
+| **`caregiver-sync-v1.1.1.aab`** | 4.0 MB | ⭐ **Caricare su Google Play Console** |
+| `caregiver-sync-v1.1.1.apk` | 4.2 MB | Test diretto sul telefono (installazione manuale) |
 | `caregiver-sync-release.jks` | 2.7 KB | 🔐 **Keystore di firma — CONSERVA CON CURA** |
 | `MARKETING.md` | — | Titolo, descrizioni e testi Play Store |
 | `DATA_SAFETY.md` | — | Compilazione modulo "Sicurezza dei Dati" di Google |
 | `PRIVACY_POLICY.md` | — | Privacy policy pronta da pubblicare (GitHub Pages, Notion, ecc.) |
 | `SORGENTE_CODICE.zip` | — | Codice sorgente completo (frontend + backend) |
 | **`screenshots/`** | — | 5 screenshot 1080×1920 pronti da caricare in Play Console |
+| **`store-graphics/`** | — | 🎨 Icona 512×512 + varianti + adaptive icon Android |
 | `screenshots.zip` | 1.6 MB | Stessa cartella zippata per download rapido |
 
 ## 🆕 Novità v1.1.0 rispetto a v1.0.0
@@ -75,7 +76,7 @@ Owner:  CN=Caregiver Sync Assistiti, OU=Mobile,
 | **Norme sulla privacy** | Serve URL pubblico → pubblica `PRIVACY_POLICY.md` su GitHub Pages / Notion e incolla l'URL |
 
 ### 4) Upload dell'AAB
-- **Produzione** → **Crea nuova release** → trascina `caregiver-sync-v1.1.0.aab`
+- **Produzione** → **Crea nuova release** → trascina `caregiver-sync-v1.1.1.aab`
 - Nota release: *"Prima versione. Registrazione assistiti, diario clinico condiviso, generazione consegna con IA, cancellazione dati GDPR-compliant."*
 - Rivedi → **Avvia rollout in produzione**
 
@@ -84,7 +85,7 @@ Prima revisione: **2-7 giorni lavorativi**. Poi l'app appare su Google Play.
 
 ## 📲 Testare l'APK sul telefono prima di pubblicare
 
-1. Trasferisci `caregiver-sync-v1.1.0.apk` sul tuo Android (USB / Drive / email)
+1. Trasferisci `caregiver-sync-v1.1.1.apk` sul tuo Android (USB / Drive / email)
 2. Impostazioni → App → Accesso speciale → Installa app sconosciute → autorizza il tuo file manager
 3. Apri il file APK dal telefono → **Installa**
 4. **IMPORTANTE**: l'app fa chiamate a `https://app-release-config.emergent.host`. Se il backend è offline, l'app mostra schermo bianco.
