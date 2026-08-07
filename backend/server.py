@@ -1,4 +1,4 @@
-from fastapi import FastAPI, APIRouter, HTTPException, status
+from fastapi import FastAPI, APIRouter, HTTPException, Request, status
 from fastapi.responses import FileResponse
 from dotenv import load_dotenv
 from starlette.middleware.cors import CORSMiddleware
@@ -234,17 +234,170 @@ async def wipe_all():
     return {"wiped": True, "patients": p.deleted_count, "entries": e.deleted_count}
 
 
+# ============================================================
+# SUBSCRIPTIONS — RevenueCat + Google Play Billing
+# ============================================================
+FREE_HANDOVER_LIMIT_MONTHLY = 3
+
+
+@api_router.get("/subscription/entitlement")
+async def get_entitlement(app_user_id: str):
+    """Fonte di verità server-side sullo stato Pro dell'utente,
+    aggiornata dal webhook RevenueCat."""
+    doc = await db.subscriptions.find_one({"app_user_id": app_user_id}, {"_id": 0})
+    if not doc:
+        return {"pro": False, "expires_at": None, "product_id": None}
+    now = datetime.now(timezone.utc)
+    expires_at = doc.get("expires_at")
+    expires_dt = None
+    if expires_at:
+        try:
+            expires_dt = datetime.fromisoformat(expires_at)
+        except Exception:
+            expires_dt = None
+    pro_active = bool(doc.get("pro_active")) and (expires_dt is None or expires_dt > now)
+    return {
+        "pro": pro_active,
+        "expires_at": expires_at,
+        "product_id": doc.get("product_id"),
+        "event_type": doc.get("event_type"),
+    }
+
+
+@api_router.get("/subscription/usage")
+async def usage(app_user_id: str):
+    """Contatore handover IA nel mese corrente + stato Pro."""
+    month_start = datetime.now(timezone.utc).replace(day=1, hour=0, minute=0, second=0, microsecond=0)
+    count = await db.handovers.count_documents({
+        "app_user_id": app_user_id,
+        "created_at": {"$gte": month_start.isoformat()},
+    })
+    ent = await get_entitlement(app_user_id)
+    return {
+        "handovers_this_month": count,
+        "free_limit": FREE_HANDOVER_LIMIT_MONTHLY,
+        "is_pro": ent["pro"],
+        "remaining": None if ent["pro"] else max(0, FREE_HANDOVER_LIMIT_MONTHLY - count),
+    }
+
+
+@api_router.post("/webhooks/revenuecat")
+async def revenuecat_webhook(request: Request):
+    """Riceve eventi RevenueCat (INITIAL_PURCHASE, RENEWAL, CANCELLATION,
+    EXPIRATION, BILLING_ISSUE, ecc.) e aggiorna la proiezione MongoDB."""
+    import hmac
+    import hashlib
+    import time as time_mod
+
+    raw = await request.body()
+    secret = os.environ.get("RC_WEBHOOK_SECRET", "")
+    header = (
+        request.headers.get("X-RevenueCat-Webhook-Signature")
+        or request.headers.get("Authorization", "")
+    )
+
+    if secret:
+        valid = False
+        try:
+            if "v1=" in header:
+                parts = dict(item.split("=", 1) for item in header.split(","))
+                ts = int(parts["t"])
+                if abs(time_mod.time() - ts) < 300:
+                    signed = f"{ts}.".encode() + raw
+                    expected = hmac.new(secret.encode(), signed, hashlib.sha256).hexdigest()
+                    valid = hmac.compare_digest(expected, parts["v1"])
+            elif header.startswith("Bearer "):
+                valid = hmac.compare_digest(header.split(" ", 1)[1], secret)
+        except Exception:
+            valid = False
+        if not valid:
+            raise HTTPException(401, "invalid webhook signature")
+
+    payload = await request.json()
+    event = payload.get("event", {})
+    event_id = event.get("id")
+    app_user_id = event.get("app_user_id")
+    if not event_id or not app_user_id:
+        raise HTTPException(400, "invalid event payload")
+
+    if await db.rc_events.find_one({"event_id": event_id}):
+        return {"status": "duplicate"}
+    await db.rc_events.insert_one({
+        "event_id": event_id,
+        "received_at": iso_now(),
+        "type": event.get("type"),
+        "app_user_id": app_user_id,
+    })
+
+    entitlement_ids = event.get("entitlement_ids") or []
+    if "pro_access" not in entitlement_ids:
+        return {"status": "ignored"}
+
+    event_type = event.get("type")
+    expiration_ms = event.get("expiration_at_ms")
+    expiration_iso = None
+    expires_dt = None
+    if expiration_ms:
+        expires_dt = datetime.fromtimestamp(expiration_ms / 1000, tz=timezone.utc)
+        expiration_iso = expires_dt.isoformat()
+
+    now = datetime.now(timezone.utc)
+    if event_type in ("EXPIRATION", "REFUND", "SUBSCRIPTION_PAUSED"):
+        pro_active = False
+    elif event_type in ("INITIAL_PURCHASE", "RENEWAL", "UNCANCELLATION", "PRODUCT_CHANGE", "CANCELLATION", "BILLING_ISSUE"):
+        pro_active = bool(expires_dt and expires_dt > now)
+    else:
+        return {"status": "recorded"}
+
+    await db.subscriptions.update_one(
+        {"app_user_id": app_user_id},
+        {"$set": {
+            "app_user_id": app_user_id,
+            "pro_active": pro_active,
+            "expires_at": expiration_iso,
+            "event_type": event_type,
+            "updated_at": iso_now(),
+            "store": event.get("store"),
+            "product_id": event.get("product_id"),
+        }},
+        upsert=True,
+    )
+    return {"status": "processed"}
+
+
+
+
 # ----- AI: Handover note generation -----
 class HandoverRequest(BaseModel):
     patient_id: str
-    hours: Optional[int] = 24  # ultime N ore da riassumere
+    hours: Optional[int] = 24
+    app_user_id: Optional[str] = None  # per gating Free/Pro
 
 
 @api_router.post("/ai/handover")
 async def ai_handover(payload: HandoverRequest):
-    """Genera una nota di consegna basata sulle voci del diario dell'assistito."""
+    """Genera una nota di consegna. Gating: max 3/mese per utenti Free."""
     from emergentintegrations.llm.chat import LlmChat, UserMessage
     from datetime import timedelta
+
+    # Gating Free tier
+    if payload.app_user_id:
+        month_start = datetime.now(timezone.utc).replace(day=1, hour=0, minute=0, second=0, microsecond=0)
+        count = await db.handovers.count_documents({
+            "app_user_id": payload.app_user_id,
+            "created_at": {"$gte": month_start.isoformat()},
+        })
+        ent = await get_entitlement(payload.app_user_id)
+        if not ent["pro"] and count >= FREE_HANDOVER_LIMIT_MONTHLY:
+            raise HTTPException(
+                status_code=402,
+                detail={
+                    "code": "pro_required",
+                    "message": f"Limite mensile raggiunto ({FREE_HANDOVER_LIMIT_MONTHLY} consegne). Passa a Pro per averle illimitate.",
+                    "used": count,
+                    "limit": FREE_HANDOVER_LIMIT_MONTHLY,
+                },
+            )
 
     patient = await db.patients.find_one({"id": payload.patient_id}, {"_id": 0})
     if not patient:
@@ -313,7 +466,10 @@ async def ai_handover(payload: HandoverRequest):
         text=text.strip(),
         entries_count=len(entries),
     )
-    await db.handovers.insert_one(handover.model_dump())
+    doc = handover.model_dump()
+    if payload.app_user_id:
+        doc["app_user_id"] = payload.app_user_id
+    await db.handovers.insert_one(doc)
 
     return {
         "id": handover.id,
@@ -393,8 +549,8 @@ async def patient_trend(patient_id: str, label: Optional[str] = None, days: int 
 RELEASE_DIR = Path("/app/release")
 ALLOWED_DOWNLOADS = {
     "google-play-kit.zip": "application/zip",
-    "caregiver-sync-v1.1.2.aab": "application/octet-stream",
-    "caregiver-sync-v1.1.2.apk": "application/vnd.android.package-archive",
+    "caregiver-sync-v1.2.0.aab": "application/octet-stream",
+    "caregiver-sync-v1.2.0.apk": "application/vnd.android.package-archive",
     "caregiver-sync-release.jks": "application/octet-stream",
     "screenshots.zip": "application/zip",
     "SORGENTE_CODICE.zip": "application/zip",
@@ -403,6 +559,7 @@ ALLOWED_DOWNLOADS = {
     "MARKETING.md": "text/markdown; charset=utf-8",
     "DATA_SAFETY.md": "text/markdown; charset=utf-8",
     "PRIVACY_POLICY.md": "text/markdown; charset=utf-8",
+    "SUBSCRIPTIONS_SETUP.md": "text/markdown; charset=utf-8",
 }
 
 
