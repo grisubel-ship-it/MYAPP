@@ -393,8 +393,8 @@ async def patient_trend(patient_id: str, label: Optional[str] = None, days: int 
 RELEASE_DIR = Path("/app/release")
 ALLOWED_DOWNLOADS = {
     "google-play-kit.zip": "application/zip",
-    "caregiver-sync-v1.1.1.aab": "application/octet-stream",
-    "caregiver-sync-v1.1.1.apk": "application/vnd.android.package-archive",
+    "caregiver-sync-v1.1.2.aab": "application/octet-stream",
+    "caregiver-sync-v1.1.2.apk": "application/vnd.android.package-archive",
     "caregiver-sync-release.jks": "application/octet-stream",
     "screenshots.zip": "application/zip",
     "SORGENTE_CODICE.zip": "application/zip",
