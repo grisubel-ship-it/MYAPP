@@ -560,6 +560,8 @@ ALLOWED_DOWNLOADS = {
     "DATA_SAFETY.md": "text/markdown; charset=utf-8",
     "PRIVACY_POLICY.md": "text/markdown; charset=utf-8",
     "SUBSCRIPTIONS_SETUP.md": "text/markdown; charset=utf-8",
+    "ios-project.zip": "application/zip",
+    "IOS_BUILD_GUIDE.md": "text/markdown; charset=utf-8",
 }
 
 
