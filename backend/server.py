@@ -551,6 +551,7 @@ ALLOWED_DOWNLOADS = {
     "google-play-kit.zip": "application/zip",
     "caregiver-sync-v1.2.1.aab": "application/octet-stream",
     "caregiver-sync-v1.2.1.apk": "application/vnd.android.package-archive",
+    "caregiver-sync-v1.2.3.aab": "application/octet-stream",
     "caregiver-sync-release.jks": "application/octet-stream",
     "screenshots.zip": "application/zip",
     "SORGENTE_CODICE.zip": "application/zip",

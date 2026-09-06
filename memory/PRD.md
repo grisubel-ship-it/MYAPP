@@ -30,6 +30,8 @@ App per la gestione della cura di anziani e persone cronicamente malate ("Caregi
 - **2026-01**: MVP con CRUD + delete flows + wipe GDPR
 - **2026-01**: v1.0.0 AAB per Google Play (`com.caregiversync.assistiti`, targetSdk 35, versionCode 1)
 - **2026-08**: v1.1.0 con feature IA, edit entries, storico handover, trend chart, home ridisegnata (versionCode 2)
+- **2026-09**: v1.2.1 rebranding package a `com.caregiversync.app` + RevenueCat + prod URL fixata (versionCode 7)
+- **2026-02** (Feb 2026): v1.2.3 aggiornamento requisiti Play Console 2026 → targetSdkVersion=36, compileSdkVersion=36, `com.android.billingclient:billing:8.0.0` (resolutionStrategy forza upgrade da RevenueCat 6.2.1). AAB firmato `/app/release/caregiver-sync-v1.2.3.aab` (versionCode 8). Testing agent iterazione 3 → 27/27 tests pass, nessuna regressione.
 
 ## Prioritized Backlog
 
@@ -53,9 +55,9 @@ App per la gestione della cura di anziani e persone cronicamente malate ("Caregi
 - **AI cost**: ogni handover consuma quota della Emergent LLM Key dell'utente
 
 ## Google Play — Stato Pubblicazione
-- ✅ AAB firmato pronto in `/app/release/caregiver-sync-v1.1.0.aab`
+- ✅ AAB firmato pronto in `/app/release/caregiver-sync-v1.2.3.aab` (targetSdk 36 + billing 8.0.0, requisiti 2026 OK)
 - ✅ MARKETING.md con testi (titolo, breve, lunga descrizione)
 - ✅ DATA_SAFETY.md pronto per il modulo Play Console
 - ✅ PRIVACY_POLICY.md GDPR-compliant con clausola IA
 - ✅ Keystore salvata + credenziali documentate in README.md
-- ⏳ **Da fare dall'utente**: pagare 25 USD account Play Console, pubblicare privacy policy URL, caricare screenshot 1080×1920, submit release
+- ⏳ **Da fare dall'utente**: caricare l'AAB v1.2.3 su Play Console (Internal testing → Production), pubblicare privacy policy URL, caricare screenshot 1080×1920, submit release, configurare RevenueCat con le chiavi reali.

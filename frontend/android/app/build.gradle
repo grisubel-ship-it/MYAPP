@@ -7,8 +7,8 @@ android {
         applicationId "com.caregiversync.app"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
-        versionCode 6
-        versionName "1.2.1"
+        versionCode 8
+        versionName "1.2.3"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         aaptOptions {
              // Files and dirs to omit from the packaged assets dir, modified to accommodate modern web apps.
@@ -49,6 +49,20 @@ dependencies {
     androidTestImplementation "androidx.test.ext:junit:$androidxJunitVersion"
     androidTestImplementation "androidx.test.espresso:espresso-core:$androidxEspressoCoreVersion"
     implementation project(':capacitor-cordova-android-plugins')
+
+    // Forza Play Billing Library >= 8.0.0 (requisito Google Play 2026)
+    implementation 'com.android.billingclient:billing:8.0.0'
+}
+
+// Assicura che TUTTE le dipendenze transitorie (es. da RevenueCat) usino billing:8+
+configurations.configureEach {
+    resolutionStrategy.eachDependency { details ->
+        if (details.requested.group == 'com.android.billingclient' &&
+            details.requested.name == 'billing') {
+            details.useVersion '8.0.0'
+            details.because 'Google Play requires billing >= 8.0.0'
+        }
+    }
 }
 
 apply from: 'capacitor.build.gradle'
