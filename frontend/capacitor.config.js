@@ -10,15 +10,6 @@ const config = {
     allowMixedContent: false,
     backgroundColor: '#F8F7F2',
   },
-  plugins: {
-    SplashScreen: {
-      launchShowDuration: 1200,
-      launchAutoHide: true,
-      backgroundColor: '#0F766E',
-      androidScaleType: 'CENTER_CROP',
-      showSpinner: false,
-    },
-  },
 };
 
 module.exports = config;

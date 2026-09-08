@@ -1431,8 +1431,8 @@ function SettingsPage() {
 // ---------- App ----------
 function App() {
   useEffect(() => {
-    // Init RevenueCat all'avvio (silenzioso su web)
-    configureRevenueCat();
+    // RevenueCat viene inizializzato on-demand quando si apre la Paywall (/pro)
+    // per evitare crash nativi all'avvio se l'app non e' ancora registrata in RC dashboard.
   }, []);
 
   return (
@@ -1463,8 +1463,15 @@ function ProPage() {
       const [e, u] = await Promise.all([fetchEntitlement(), fetchUsage()]);
       setEntitlement(e);
       setUsage(u);
-      const off = await getOfferings();
-      setOfferings(off);
+      // Inizializza RC solo qui (paywall), con try/catch difensivo
+      try {
+        await configureRevenueCat();
+        const off = await getOfferings();
+        setOfferings(off);
+      } catch (rcErr) {
+        console.warn("[Pro] RevenueCat non disponibile", rcErr);
+        setOfferings(null);
+      }
     } catch (err) {
       console.error(err);
     }
