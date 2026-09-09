@@ -497,8 +497,14 @@ function NewPatient() {
       await axios.post(`${API}/patients`, payload);
       toast.success("Assistito registrato");
       navigate("/");
-    } catch {
-      toast.error("Errore durante il salvataggio");
+    } catch (err) {
+      const detail =
+        err?.response?.data?.detail ||
+        err?.response?.statusText ||
+        err?.message ||
+        "errore sconosciuto";
+      toast.error(`Salvataggio non riuscito: ${detail}`);
+      console.error("[NewPatient] save error:", err);
     } finally {
       setSaving(false);
     }
