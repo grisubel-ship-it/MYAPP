@@ -839,19 +839,21 @@ function PatientDetail() {
 
       {/* AI Handover generator */}
       <Card className="border-teal-200 bg-gradient-to-br from-teal-50 to-white">
-        <CardContent className="p-4 flex items-center gap-4">
-          <div className="w-11 h-11 rounded-xl bg-teal-600 grid place-items-center shrink-0">
-            <Sparkles size={20} className="text-white" />
-          </div>
-          <div className="flex-1 min-w-0">
-            <div className="font-semibold text-stone-900">Consegna con IA</div>
-            <div className="text-sm text-stone-600">
-              Genera una nota di passaggio consegne per il turno successivo, basata sulle voci del diario
+        <CardContent className="p-4 flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4">
+          <div className="flex items-start gap-3 flex-1 min-w-0">
+            <div className="w-11 h-11 rounded-xl bg-teal-600 grid place-items-center shrink-0">
+              <Sparkles size={20} className="text-white" />
+            </div>
+            <div className="flex-1 min-w-0">
+              <div className="font-semibold text-stone-900">Consegna con IA</div>
+              <div className="text-sm text-stone-600">
+                Genera una nota di passaggio consegne per il turno successivo, basata sulle voci del diario
+              </div>
             </div>
           </div>
-          <div className="flex items-center gap-2 shrink-0">
+          <div className="flex items-center gap-2 shrink-0 w-full sm:w-auto">
             <Select value={String(handoverHours)} onValueChange={(v) => setHandoverHours(parseInt(v, 10))}>
-              <SelectTrigger className="w-[110px]" data-testid="handover-hours-select">
+              <SelectTrigger className="flex-1 sm:flex-none sm:w-[110px]" data-testid="handover-hours-select">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
@@ -864,7 +866,7 @@ function PatientDetail() {
             <Button
               onClick={generateHandover}
               disabled={handoverLoading || entries.length === 0}
-              className="bg-teal-600 hover:bg-teal-700"
+              className="bg-teal-600 hover:bg-teal-700 shrink-0"
               data-testid="generate-handover-btn"
             >
               <Sparkles size={16} className="mr-1" /> Genera
