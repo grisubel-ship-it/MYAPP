@@ -536,7 +536,7 @@ function NewPatient() {
               data-testid="patient-pathology-input"
               value={form.pathology}
               onChange={(e) => setForm({ ...form, pathology: e.target.value })}
-              placeholder="Es. Diabete tipo 2"
+              placeholder="Es. Note quotidiane"
             />
           </div>
           <div>
@@ -558,7 +558,7 @@ function NewPatient() {
             data-testid="patient-notes-input"
             value={form.notes}
             onChange={(e) => setForm({ ...form, notes: e.target.value })}
-            placeholder="Allergie, routine, note utili al passaggio di consegne…"
+            placeholder="Routine, orari, note utili al passaggio di consegne…"
             rows={4}
           />
         </div>

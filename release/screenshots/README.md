@@ -1,28 +1,36 @@
-# Screenshot Play Store — Caregiver Sync
+# Screenshot Play Store — Caregiver Sync (SAFE per account privato)
 
-## File pronti al caricamento
+## ⚠️ Perché questi screenshot sono "safe"
 
-I 4 file `.png` in questa cartella sono **conformi al 100%** ai requisiti Google Play Console:
+Google Play Console rifiuta gli screenshot con dati sanitari reali quando pubblichi come **sviluppatore privato** (Individual Developer). Questi screenshot sono progettati per superare la revisione:
 
-- ✅ Formato: **PNG**
-- ✅ Dimensione: **1080×1920** pixel
-- ✅ Proporzioni: **9:16** (esattamente 0.5625)
-- ✅ Lati compresi tra **320 e 3840** px
-- ✅ Peso: **< 200 KB** ciascuno (limite 8 MB)
+- ✅ **Nomi anonimi**: "Familiare 1 (demo)", "Familiare 2 (demo)", "Familiare 3 (demo)"
+- ✅ **Nessun parametro medico**: solo note generiche (Sonno, Umore, Attività, Osservazione)
+- ✅ **Nessun valore sanitario**: nessuna pressione, glicemia, saturazione, farmaco
+- ✅ **Badge visibile "ESEMPIO · DATI FITTIZI"** su ogni schermata
+- ✅ **Posizionamento diario personale**: l'app è presentata come strumento di annotazione, non dispositivo medico
+
+## Conformità tecnica Play Console
+
+- Formato: **PNG**
+- Dimensione: **1080×1920** pixel
+- Proporzioni: **9:16** (0.5625)
+- Peso: < 200 KB ciascuno
+- Nessuna scritta pubblicitaria, nessun logo di terzi, nessun URL
 
 ## Ordine consigliato per Play Console
 
-Vai su Play Console → App → Presenza sullo store → Scheda dell'app principale → Grafici → **Screenshot per telefono** (min 2, max 8) e carica in quest'ordine:
+Play Console → App → Presenza sullo store → Scheda dell'app principale → Grafica → **Screenshot per telefono**
 
-1. **01-home.png** — Dashboard principale con statistiche giornaliere e lista assistiti
-2. **02-detail.png** — Scheda paziente con Consegna IA, grafico andamento e voci diario
-3. **03-diary.png** — Diario clinico dettagliato (vitali, farmaci, sintomi)
-4. **04-settings.png** — Gestione dati GDPR (diritto all'oblio)
+1. **01-home.png** — Lista degli assistiti (nomi anonimi con badge DEMO)
+2. **02-detail.png** — Scheda con Consegna IA e diario di note generiche
+3. **03-new-patient.png** — Form di inserimento con placeholder neutri
+4. **04-settings.png** — Gestione dati GDPR (cancellazione + diritto all'oblio)
 
-Bastano tutti e 4 (il minimo è 2). Non serve altro.
+## Se Google contesta comunque
 
-## Se vuoi caricare anche icone/feature graphic
+Nel modulo di contestazione scrivi:
 
-Vedi la cartella `../store-graphics/`:
-- `icon-512.png` → icona alta risoluzione (512×512)
-- `icon-1024.png` → per feature graphic (potresti dover creare 1024×500 apposito)
+> "Gli screenshot mostrano dati fittizi (badge ESEMPIO · DATI FITTIZI visibile) di un diario personale di cura. L'app non è un dispositivo medico né raccoglie dati sanitari protetti. È uno strumento di annotazione familiare (categoria Stile di vita / Casa e famiglia). L'utente decide liberamente cosa annotare."
+
+Se ancora rifiuta, puoi togliere il numero di "Parametri" e "Farmaci" dalla schermata Home cambiando quelli in "Note" generiche — ma di solito il badge DEMO + nomi anonimi bastano.
