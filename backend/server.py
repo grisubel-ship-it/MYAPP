@@ -582,6 +582,7 @@ ALLOWED_DOWNLOADS = {
     "SUBSCRIPTIONS_SETUP.md": "text/markdown; charset=utf-8",
     "ios-project.zip": "application/zip",
     "IOS_BUILD_GUIDE.md": "text/markdown; charset=utf-8",
+    "FIVERR_UPWORK_JOB.md": "text/markdown; charset=utf-8",
 }
 
 
