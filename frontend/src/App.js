@@ -96,6 +96,24 @@ import {
 
 const API = `${process.env.REACT_APP_BACKEND_URL}/api`;
 
+// Axios: timeout 15s + retry automatico su errori di rete/500/502/503/504
+// utile quando il backend si sta risvegliando dopo inattività
+axios.defaults.timeout = 15000;
+axios.interceptors.response.use(
+  (r) => r,
+  async (err) => {
+    const cfg = err?.config;
+    if (!cfg || cfg.__retryCount >= 3) return Promise.reject(err);
+    const status = err?.response?.status;
+    const isRetryable = !err.response || [502, 503, 504, 408, 429, 500].includes(status);
+    if (!isRetryable) return Promise.reject(err);
+    cfg.__retryCount = (cfg.__retryCount || 0) + 1;
+    const delay = 800 * cfg.__retryCount; // 800ms, 1.6s, 2.4s
+    await new Promise((r) => setTimeout(r, delay));
+    return axios(cfg);
+  }
+);
+
 // ---------- Utility: Undo toast ----------
 const UNDO_MS = 5000;
 
@@ -278,7 +296,19 @@ function PatientsList() {
       setPatients(pRes.data);
       setStats(sRes.data);
     } catch (e) {
-      toast.error("Impossibile caricare l'elenco pazienti");
+      const isNetwork = !e.response;
+      toast.error(
+        isNetwork
+          ? "Server non raggiungibile. Controlla la connessione e riprova."
+          : `Errore ${e.response?.status || ''}: ${e.response?.data?.detail || 'imprevisto'}`,
+        {
+          action: {
+            label: "Riprova",
+            onClick: () => load(),
+          },
+          duration: 8000,
+        }
+      );
     } finally {
       setLoading(false);
     }

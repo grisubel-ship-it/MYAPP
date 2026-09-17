@@ -571,6 +571,8 @@ ALLOWED_DOWNLOADS = {
     "caregiver-sync-v1.2.8.apk": "application/vnd.android.package-archive",
     "caregiver-sync-v1.2.9.aab": "application/octet-stream",
     "caregiver-sync-v1.2.9.apk": "application/vnd.android.package-archive",
+    "caregiver-sync-v1.3.0.aab": "application/octet-stream",
+    "caregiver-sync-v1.3.0.apk": "application/vnd.android.package-archive",
     "caregiver-sync-release.jks": "application/octet-stream",
     "screenshots.zip": "application/zip",
     "SORGENTE_CODICE.zip": "application/zip",
