@@ -33,6 +33,11 @@ App per la gestione della cura di anziani e persone cronicamente malate ("Caregi
 - **2026-09**: v1.2.1 rebranding package a `com.caregiversync.app` + RevenueCat + prod URL fixata (versionCode 7)
 - **2026-02** (Feb 2026): v1.2.3 aggiornamento requisiti Play Console 2026 → targetSdkVersion=36, compileSdkVersion=36, `com.android.billingclient:billing:8.0.0` (resolutionStrategy forza upgrade da RevenueCat 6.2.1). AAB firmato `/app/release/caregiver-sync-v1.2.3.aab` (versionCode 8). Testing agent iterazione 3 → 27/27 tests pass, nessuna regressione.
 - **2026-02**: v1.2.4 chiave RevenueCat reale iniettata (`goog_jcTcoViIwdKAfczoSbGvbXlydYP`) in `.env.production`, AAB rigenerato → `/app/release/caregiver-sync-v1.2.4.aab` (versionCode 9). Chiave verificata dentro il bundle JS embeddato nell'AAB.
+- **2026-09**: fix CORS backend (`allow_credentials=False`) per compatibilità WebView Android; fix layout mobile "Consegna con IA" (versione 1.2.8, versionCode 13).
+- **2026-09**: v1.3.0 aggiunto retry automatico axios (3 tentativi con backoff 0.8/1.6/2.4s) su errori 5xx/timeout, bottone "Riprova" nel toast (versionCode 15).
+- **2026-09**: v1.3.1 rigenerato per test (versionCode 16).
+- **2026-09**: **Deploy backend in produzione completato** — URL: `https://app-release-config.emergent.host` (sempre attivo, CORS OK).
+- **2026-09**: v1.3.2 AAB+APK puntati al backend di produzione (versionCode 17). ZIP kit completo aggiornato → `/app/release/google-play-kit-v1.3.2.zip`.
 
 ## Prioritized Backlog
 
@@ -56,7 +61,7 @@ App per la gestione della cura di anziani e persone cronicamente malate ("Caregi
 - **AI cost**: ogni handover consuma quota della Emergent LLM Key dell'utente
 
 ## Google Play — Stato Pubblicazione
-- ✅ AAB firmato pronto in `/app/release/caregiver-sync-v1.2.4.aab` (targetSdk 36 + billing 8.0.0 + chiave RevenueCat reale)
+- ✅ AAB firmato pronto in `/app/release/caregiver-sync-v1.3.2.aab` (targetSdk 36 + billing 8.0.0 + RevenueCat key reale + retry automatico + backend produzione)
 - ✅ MARKETING.md con testi (titolo, breve, lunga descrizione)
 - ✅ DATA_SAFETY.md pronto per il modulo Play Console
 - ✅ PRIVACY_POLICY.md GDPR-compliant con clausola IA
