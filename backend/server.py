@@ -591,6 +591,8 @@ ALLOWED_DOWNLOADS = {
     "ios-project.zip": "application/zip",
     "IOS_BUILD_GUIDE.md": "text/markdown; charset=utf-8",
     "FIVERR_UPWORK_JOB.md": "text/markdown; charset=utf-8",
+    "volantino-caregiver-sync-playstore.pdf": "application/pdf",
+    "volantino-caregiver-sync-beta.pdf": "application/pdf",
 }
 
 
