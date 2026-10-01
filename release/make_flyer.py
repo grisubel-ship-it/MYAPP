@@ -93,11 +93,11 @@ def draw_flyer(path, qr_url, title_badge, cta_text, steps):
     c = canvas.Canvas(path, pagesize=A4)
     c.setTitle("Caregiver Sync — Volantino promozionale")
 
-    # === 1) Logo banner GRANDE in alto (tutta la larghezza) ===
-    logo_tmp = "/tmp/_logo_banner.png"
-    build_logo_banner(logo_tmp, 1600, 640)
-    banner_h = 240
-    c.drawImage(logo_tmp, 0, PAGE_H - banner_h, width=PAGE_W, height=banner_h, mask='auto')
+    # === 1) Logo banner GRANDE in alto (tutta la larghezza) — usa il logo reale dell'utente ===
+    logo_src = "/app/release/logo-caregiver-sync.png"
+    # Il logo ha aspect ratio 2000:814 (~2.457:1)
+    banner_h = int(PAGE_W / (2000 / 814))  # mantieni ratio reale
+    c.drawImage(logo_src, 0, PAGE_H - banner_h, width=PAGE_W, height=banner_h, mask='auto')
 
     # Badge arancione subito sotto il banner
     badge_y = PAGE_H - banner_h - 22
