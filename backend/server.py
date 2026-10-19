@@ -10,6 +10,7 @@ from pydantic import BaseModel, Field, ConfigDict
 from typing import List, Optional
 import uuid
 from datetime import datetime, timezone
+from access import build_router as build_access_router
 
 
 ROOT_DIR = Path(__file__).parent
@@ -365,6 +366,7 @@ async def revenuecat_webhook(request: Request):
     return {"status": "processed"}
 
 
+access_router = build_access_router(db, get_entitlement)
 
 
 # ----- AI: Handover note generation -----
@@ -380,22 +382,14 @@ async def ai_handover(payload: HandoverRequest):
     from emergentintegrations.llm.chat import LlmChat, UserMessage
     from datetime import timedelta
 
-    # Gating Free tier
     if payload.app_user_id:
-        month_start = datetime.now(timezone.utc).replace(day=1, hour=0, minute=0, second=0, microsecond=0)
-        count = await db.handovers.count_documents({
-            "app_user_id": payload.app_user_id,
-            "created_at": {"$gte": month_start.isoformat()},
-        })
-        ent = await get_entitlement(payload.app_user_id)
-        if not ent["pro"] and count >= FREE_HANDOVER_LIMIT_MONTHLY:
+        acc = await access_router.compute_access(payload.app_user_id)
+        if not acc["access"]:
             raise HTTPException(
                 status_code=402,
                 detail={
                     "code": "pro_required",
-                    "message": f"Limite mensile raggiunto ({FREE_HANDOVER_LIMIT_MONTHLY} consegne). Passa a Pro per averle illimitate.",
-                    "used": count,
-                    "limit": FREE_HANDOVER_LIMIT_MONTHLY,
+                    "message": "La prova gratuita è terminata. Abbonati o inserisci un codice convenzione.",
                 },
             )
 
@@ -628,6 +622,7 @@ async def list_downloads():
 
 
 app.include_router(api_router)
+app.include_router(access_router)
 
 app.add_middleware(
     CORSMiddleware,

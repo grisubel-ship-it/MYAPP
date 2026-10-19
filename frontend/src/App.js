@@ -28,9 +28,6 @@ import {
   Clock,
   ChevronRight,
   Crown,
-  Check,
-  Zap,
-  RefreshCw,
 } from "lucide-react";
 import {
   LineChart,
@@ -42,16 +39,10 @@ import {
   CartesianGrid,
   Legend,
 } from "recharts";
-import {
-  isNative,
-  getAppUserId,
-  configureRevenueCat,
-  getOfferings,
-  purchasePackage,
-  restorePurchases,
-  fetchEntitlement,
-  fetchUsage,
-} from "@/lib/subscription";
+import { getAppUserId } from "@/lib/subscription";
+import ProPage from "@/pages/ProPage";
+import AdminPage from "@/pages/AdminPage";
+import { AccessProvider, AccessGate, TrialBanner } from "@/components/AccessGate";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -253,7 +244,7 @@ function Shell({ children }) {
           <div className="flex items-center gap-1">
             <Link to="/pro" data-testid="pro-link">
               <Button variant="ghost" size="sm" className="text-teal-700 gap-1">
-                <Crown size={16} /> Pro
+                <Crown size={16} /> Premium
               </Button>
             </Link>
             <Link to="/impostazioni" data-testid="settings-link">
@@ -264,6 +255,7 @@ function Shell({ children }) {
           </div>
         </div>
       </header>
+      <TrialBanner />
       <main className="max-w-4xl mx-auto px-5 py-6">{children}</main>
       <Toaster position="bottom-center" richColors closeButton />
     </div>
@@ -726,7 +718,7 @@ function PatientDetail() {
       const detail = err?.response?.data?.detail;
       if (status === 402 && detail?.code === "pro_required") {
         setHandoverOpen(false);
-        toast.error(detail.message || "Limite mensile raggiunto");
+        toast.error(detail.message || "Prova gratuita terminata");
         // Reindirizza al paywall dopo un attimo
         setTimeout(() => navigate("/pro"), 1200);
       } else {
@@ -1468,225 +1460,24 @@ function SettingsPage() {
 
 // ---------- App ----------
 function App() {
-  useEffect(() => {
-    // RevenueCat viene inizializzato on-demand quando si apre la Paywall (/pro)
-    // per evitare crash nativi all'avvio se l'app non e' ancora registrata in RC dashboard.
-  }, []);
-
+  // RevenueCat viene inizializzato solo nella Paywall (/pro) per evitare crash all'avvio.
   return (
     <BrowserRouter>
+      <AccessProvider>
       <Shell>
+        <AccessGate>
         <Routes>
           <Route path="/" element={<PatientsList />} />
           <Route path="/nuovo" element={<NewPatient />} />
           <Route path="/paziente/:id" element={<PatientDetail />} />
           <Route path="/impostazioni" element={<SettingsPage />} />
           <Route path="/pro" element={<ProPage />} />
+          <Route path="/admin" element={<AdminPage />} />
         </Routes>
+        </AccessGate>
       </Shell>
+      </AccessProvider>
     </BrowserRouter>
-  );
-}
-
-// ---------- Pro / Paywall page ----------
-function ProPage() {
-  const [entitlement, setEntitlement] = useState(null);
-  const [usage, setUsage] = useState(null);
-  const [offerings, setOfferings] = useState(null);
-  const [busy, setBusy] = useState(false);
-  const [msg, setMsg] = useState("");
-
-  const load = async () => {
-    try {
-      const [e, u] = await Promise.all([fetchEntitlement(), fetchUsage()]);
-      setEntitlement(e);
-      setUsage(u);
-      // Inizializza RC solo qui (paywall), con try/catch difensivo
-      try {
-        await configureRevenueCat();
-        const off = await getOfferings();
-        setOfferings(off);
-      } catch (rcErr) {
-        console.warn("[Pro] RevenueCat non disponibile", rcErr);
-        setOfferings(null);
-      }
-    } catch (err) {
-      console.error(err);
-    }
-  };
-
-  useEffect(() => {
-    load();
-  }, []);
-
-  const handleBuy = async (pkg) => {
-    setBusy(true);
-    setMsg("");
-    try {
-      await purchasePackage(pkg);
-      toast.success("Abbonamento attivato! 🎉");
-      // Attendi che il webhook aggiorni il backend
-      setTimeout(load, 3000);
-    } catch (err) {
-      if (!err?.userCancelled) {
-        toast.error("Acquisto non riuscito. Riprova.");
-      }
-    } finally {
-      setBusy(false);
-    }
-  };
-
-  const handleRestore = async () => {
-    setBusy(true);
-    try {
-      const info = await restorePurchases();
-      if (info) {
-        toast.success("Acquisti ripristinati");
-        setTimeout(load, 2000);
-      } else {
-        toast.info("Nessun abbonamento attivo trovato");
-      }
-    } catch {
-      toast.error("Ripristino non riuscito");
-    } finally {
-      setBusy(false);
-    }
-  };
-
-  const isPro = entitlement?.pro;
-  const nativeApp = isNative();
-
-  return (
-    <div className="space-y-5 max-w-lg mx-auto">
-      <Link to="/" className="text-teal-700 text-sm inline-flex items-center gap-1" data-testid="back-to-home">
-        <ChevronLeft size={16} /> Torna alla home
-      </Link>
-
-      {isPro ? (
-        <Card className="border-teal-300 bg-gradient-to-br from-teal-50 to-white">
-          <CardContent className="p-6 text-center space-y-2">
-            <div className="w-14 h-14 rounded-2xl bg-teal-600 mx-auto grid place-items-center">
-              <Crown size={26} className="text-white" />
-            </div>
-            <h2 className="text-2xl font-serif text-stone-900">Sei un utente Pro</h2>
-            <p className="text-sm text-stone-600">
-              Grazie per il supporto ❤️ Hai consegne IA illimitate e tutte le funzioni sbloccate.
-            </p>
-            {entitlement?.expires_at && (
-              <p className="text-xs text-stone-500 pt-2">
-                Rinnovo/scadenza: {new Date(entitlement.expires_at).toLocaleDateString("it-IT")}
-              </p>
-            )}
-          </CardContent>
-        </Card>
-      ) : (
-        <>
-          <div className="text-center space-y-2">
-            <div className="w-14 h-14 rounded-2xl bg-teal-600 mx-auto grid place-items-center">
-              <Crown size={26} className="text-white" />
-            </div>
-            <h1 className="text-3xl font-serif text-stone-900">Passa a Pro</h1>
-            <p className="text-stone-600 text-sm">
-              Sblocca il pieno potenziale di Caregiver Sync per la tua famiglia.
-            </p>
-          </div>
-
-          {usage && (
-            <Card>
-              <CardContent className="p-4 flex items-center justify-between text-sm">
-                <div>
-                  <div className="font-medium text-stone-900">Consegne IA questo mese</div>
-                  <div className="text-stone-500">
-                    {usage.handovers_this_month} di {usage.free_limit} usate
-                    {usage.remaining !== null && ` — ${usage.remaining} rimaste`}
-                  </div>
-                </div>
-                <div className="w-16 h-2 bg-stone-200 rounded-full overflow-hidden">
-                  <div
-                    className="h-full bg-teal-600 transition-all"
-                    style={{ width: `${Math.min(100, (usage.handovers_this_month / usage.free_limit) * 100)}%` }}
-                  />
-                </div>
-              </CardContent>
-            </Card>
-          )}
-
-          <Card>
-            <CardContent className="p-5 space-y-3">
-              <div className="text-sm font-semibold text-stone-900">Con Pro ottieni:</div>
-              {[
-                "Consegne IA illimitate (ora 3/mese)",
-                "Assistiti illimitati",
-                "Grafici andamento e storico completo",
-                "Supporto prioritario",
-                "Prova gratuita di 7 giorni",
-              ].map((f) => (
-                <div key={f} className="flex items-start gap-2 text-sm">
-                  <Check size={16} className="text-teal-600 mt-0.5 shrink-0" />
-                  <span className="text-stone-700">{f}</span>
-                </div>
-              ))}
-            </CardContent>
-          </Card>
-
-          {nativeApp && offerings?.availablePackages?.length ? (
-            <div className="space-y-2">
-              {offerings.availablePackages.map((pkg) => {
-                const isAnnual = pkg.identifier?.includes("annual") || pkg.packageType === "ANNUAL";
-                return (
-                  <Card
-                    key={pkg.identifier}
-                    className={isAnnual ? "border-teal-400 ring-2 ring-teal-100" : ""}
-                  >
-                    <CardContent className="p-4 flex items-center justify-between gap-3">
-                      <div>
-                        <div className="font-semibold text-stone-900 flex items-center gap-2">
-                          {isAnnual ? "Piano Annuale" : "Piano Mensile"}
-                          {isAnnual && (
-                            <Badge className="bg-teal-600 hover:bg-teal-700">Risparmi 33%</Badge>
-                          )}
-                        </div>
-                        <div className="text-xs text-stone-500 mt-0.5">
-                          {pkg.product?.priceString ?? "—"}
-                          {isAnnual ? " / anno" : " / mese"} · 7 giorni gratis
-                        </div>
-                      </div>
-                      <Button
-                        onClick={() => handleBuy(pkg)}
-                        disabled={busy}
-                        className="bg-teal-600 hover:bg-teal-700"
-                        data-testid={`buy-${pkg.identifier}`}
-                      >
-                        <Zap size={14} className="mr-1" /> Prova gratis
-                      </Button>
-                    </CardContent>
-                  </Card>
-                );
-              })}
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={handleRestore}
-                disabled={busy}
-                className="w-full mt-2 text-stone-600"
-                data-testid="restore-purchases-btn"
-              >
-                <RefreshCw size={14} className="mr-1" /> Ripristina acquisti
-              </Button>
-            </div>
-          ) : (
-            <Card className="border-amber-200 bg-amber-50">
-              <CardContent className="p-4 text-sm text-amber-900">
-                {nativeApp
-                  ? "Le offerte non sono disponibili al momento. Verifica che l'app sia installata dal Play Store e riprova."
-                  : "L'abbonamento Pro è disponibile solo nell'app Android installata da Google Play Store. Aprila da lì per procedere."}
-              </CardContent>
-            </Card>
-          )}
-          {msg && <p className="text-sm text-red-600 text-center">{msg}</p>}
-        </>
-      )}
-    </div>
   );
 }
 

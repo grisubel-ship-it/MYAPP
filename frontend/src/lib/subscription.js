@@ -92,3 +92,36 @@ export async function fetchUsage() {
   const { data } = await axios.get(`${API}/subscription/usage`, { params: { app_user_id: uid } });
   return data;
 }
+
+// Stato di accesso (prova 30gg / convenzione / abbonamento)
+export async function fetchAccess() {
+  const { data } = await axios.get(`${API}/access/status`, { params: { app_user_id: getAppUserId() } });
+  return data;
+}
+
+export async function redeemConvention(code) {
+  const { data } = await axios.post(`${API}/conventions/redeem`, { code, app_user_id: getAppUserId() });
+  return data;
+}
+
+// Abbonamento attivo lato store (subito dopo l'acquisto, prima del webhook)
+const RC_PRO_UNTIL_KEY = "cgsync.rc_pro_until";
+export function rememberStorePro(customerInfo) {
+  const ent = customerInfo?.entitlements?.active?.pro_access;
+  if (!ent) return false;
+  const until = ent.expirationDate ? new Date(ent.expirationDate).getTime() : Date.now() + 864e5;
+  localStorage.setItem(RC_PRO_UNTIL_KEY, String(until));
+  return true;
+}
+export function hasLocalStorePro() {
+  return Number(localStorage.getItem(RC_PRO_UNTIL_KEY) || 0) > Date.now();
+}
+
+// Trova i pacchetti mensile/annuale dalle offerte RevenueCat
+export function pickPackages(offering) {
+  const pkgs = offering?.availablePackages || [];
+  const find = (type, id) =>
+    pkgs.find((p) => p.packageType === type) ||
+    pkgs.find((p) => (p.product?.identifier || "").startsWith(id));
+  return { monthly: find("MONTHLY", "premium_monthly"), yearly: find("ANNUAL", "premium_yearly") };
+}
