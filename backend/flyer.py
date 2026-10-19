@@ -1,4 +1,5 @@
 import io
+from urllib.parse import quote
 from pathlib import Path
 
 import qrcode
@@ -43,9 +44,9 @@ def _fit(c, text, font, size, max_w, min_size=7):
     return size
 
 
-def _qr():
+def _qr(code: str):
     qr = qrcode.QRCode(error_correction=qrcode.constants.ERROR_CORRECT_H, box_size=20, border=2)
-    qr.add_data(PLAY_URL)
+    qr.add_data(f"{PLAY_URL}&referrer={quote('conv_code=' + code)}")
     qr.make(fit=True)
     buf = io.BytesIO()
     qr.make_image(fill_color="#1C1917", back_color="white").convert("RGB").save(buf, "PNG")
@@ -122,7 +123,7 @@ def build_coop_flyer(cooperative_name: str, code: str, duration_months: int) -> 
     c.setFillColor(STONE_900)
     c.setFont("Helvetica-Bold", 11)
     c.drawCentredString(qx + qs / 2, qy + qs + 12, "Scansiona e scarica l'app")
-    c.drawImage(_qr(), qx, qy, width=qs, height=qs, mask="auto")
+    c.drawImage(_qr(code), qx, qy, width=qs, height=qs, mask="auto")
     c.setFillColor(STONE_500)
     c.setFont("Helvetica", 8.5)
     c.drawCentredString(qx + qs / 2, qy - 12, "o cerca 'Caregiver Sync' su Google Play")
@@ -134,8 +135,8 @@ def build_coop_flyer(cooperative_name: str, code: str, duration_months: int) -> 
     c.drawString(50, sy, "Come attivare Premium")
     steps = [
         "Scarica Caregiver Sync da Google Play",
-        "Tocca Premium in alto a destra",
-        "Inserisci il codice qui sopra e tocca Attiva",
+        "Aprila: con il QR il codice si attiva da solo",
+        "Altrimenti tocca Premium e inserisci il codice qui sopra",
     ]
     c.setFont("Helvetica", 11)
     for i, s in enumerate(steps, 1):

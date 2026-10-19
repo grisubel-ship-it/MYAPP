@@ -1,0 +1,12 @@
+[
+  {
+    "relation": ["delegate_permission/common.handle_all_urls"],
+    "target": {
+      "namespace": "android_app",
+      "package_name": "com.caregiversync.app",
+      "sha256_cert_fingerprints": [
+        "55:B2:98:5B:02:4C:9C:21:1E:3E:71:97:B6:48:3E:32:25:02:4D:B9:6E:8A:B0:EC:5A:1D:54:EF:1A:EF:CE:F1"
+      ]
+    }
+  }
+]

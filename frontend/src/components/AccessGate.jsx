@@ -3,17 +3,28 @@ import { Link, Navigate, useLocation, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Clock } from "lucide-react";
-import { fetchAccess, hasLocalStorePro } from "@/lib/subscription";
+import { toast } from "sonner";
+import {
+  fetchAccess,
+  hasLocalStorePro,
+  initAppUserId,
+  consumeInstallReferrerCode,
+  redeemConvention,
+  isNative,
+  parseCodeFromText,
+} from "@/lib/subscription";
 
 const AccessContext = createContext({ status: null, refresh: () => {} });
 export const useAccess = () => useContext(AccessContext);
 
 const OPEN_PATHS = ["/pro", "/admin"];
+const isOpenPath = (p) => OPEN_PATHS.includes(p) || p.startsWith("/c/");
 
 export function AccessProvider({ children }) {
   const [status, setStatus] = useState(null);
   const refresh = useCallback(async () => {
     try {
+      await initAppUserId();
       const data = await fetchAccess();
       if (!data.access && hasLocalStorePro()) data.access = true;
       setStatus(data);
@@ -23,7 +34,19 @@ export function AccessProvider({ children }) {
     }
   }, []);
   useEffect(() => {
-    refresh();
+    (async () => {
+      await initAppUserId();
+      const code = await consumeInstallReferrerCode();
+      if (code) {
+        try {
+          const res = await redeemConvention(code);
+          toast.success(`Premium attivato tramite ${res.convention?.cooperative_name}`);
+        } catch {
+          toast.info(`Codice ${code} non attivabile. Puoi inserirne un altro nella pagina Premium.`);
+        }
+      }
+      refresh();
+    })();
   }, [refresh]);
   return <AccessContext.Provider value={{ status, refresh }}>{children}</AccessContext.Provider>;
 }
@@ -31,7 +54,7 @@ export function AccessProvider({ children }) {
 export function AccessGate({ children }) {
   const { status } = useAccess();
   const { pathname } = useLocation();
-  if (OPEN_PATHS.includes(pathname)) return children;
+  if (isOpenPath(pathname)) return children;
   if (!status) {
     return (
       <div className="py-24 text-center text-stone-500 text-sm" data-testid="access-loading">
@@ -51,7 +74,7 @@ export function AccessGate({ children }) {
 export function TrialBanner() {
   const { status } = useAccess();
   const { pathname } = useLocation();
-  if (!status || status.reason !== "trial" || pathname === "/admin") return null;
+  if (!status || status.reason !== "trial" || pathname === "/admin" || pathname.startsWith("/c/")) return null;
   const days = status.trial_days_left;
   const urgent = days <= 3;
   return (
@@ -108,4 +131,22 @@ function TrialEndingDialog({ status }) {
       </DialogContent>
     </Dialog>
   );
+}
+
+// Apre /pro con il codice precompilato quando l'app viene aperta da un link
+export function DeepLinkHandler() {
+  const navigate = useNavigate();
+  useEffect(() => {
+    if (!isNative()) return undefined;
+    let handle;
+    (async () => {
+      const { App } = await import("@capacitor/app");
+      handle = await App.addListener("appUrlOpen", ({ url }) => {
+        const code = parseCodeFromText(url);
+        if (code) navigate(`/pro?code=${code}`);
+      });
+    })();
+    return () => handle?.remove();
+  }, [navigate]);
+  return null;
 }

@@ -42,7 +42,8 @@ import {
 import { getAppUserId } from "@/lib/subscription";
 import ProPage from "@/pages/ProPage";
 import AdminPage from "@/pages/AdminPage";
-import { AccessProvider, AccessGate, TrialBanner } from "@/components/AccessGate";
+import { AccessProvider, AccessGate, TrialBanner, DeepLinkHandler } from "@/components/AccessGate";
+import CodeLandingPage from "@/pages/CodeLandingPage";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -1464,6 +1465,7 @@ function App() {
   return (
     <BrowserRouter>
       <AccessProvider>
+      <DeepLinkHandler />
       <Shell>
         <AccessGate>
         <Routes>
@@ -1473,6 +1475,7 @@ function App() {
           <Route path="/impostazioni" element={<SettingsPage />} />
           <Route path="/pro" element={<ProPage />} />
           <Route path="/admin" element={<AdminPage />} />
+          <Route path="/c/:code" element={<CodeLandingPage />} />
         </Routes>
         </AccessGate>
       </Shell>

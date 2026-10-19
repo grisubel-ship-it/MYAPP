@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useSearchParams } from "react-router-dom";
 import { toast } from "sonner";
 import { ChevronLeft, Crown, Check, Zap, RefreshCw, Ticket, Building2, Clock, Lock } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -76,8 +76,8 @@ function PlanCard({ kind, pkg, busy, onBuy }) {
   );
 }
 
-function ConventionCard({ onRedeemed }) {
-  const [code, setCode] = useState("");
+function ConventionCard({ onRedeemed, initialCode }) {
+  const [code, setCode] = useState(initialCode || "");
   const [busy, setBusy] = useState(false);
   const submit = async (e) => {
     e.preventDefault();
@@ -115,6 +115,8 @@ function ConventionCard({ onRedeemed }) {
 
 export default function ProPage() {
   const { status, refresh } = useAccess();
+  const [params] = useSearchParams();
+  const linkCode = (params.get("code") || "").toUpperCase();
   const [packages, setPackages] = useState({});
   const [busy, setBusy] = useState(false);
   const native = isNative();
@@ -211,7 +213,7 @@ export default function ProPage() {
             </p>
           </div>
 
-          <ConventionCard onRedeemed={refresh} />
+          <ConventionCard key={linkCode} initialCode={linkCode} onRedeemed={refresh} />
         </>
       )}
     </div>

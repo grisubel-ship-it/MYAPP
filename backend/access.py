@@ -37,6 +37,11 @@ class RedeemRequest(BaseModel):
     app_user_id: str = Field(min_length=3, max_length=100)
 
 
+class MigrateRequest(BaseModel):
+    from_id: str = Field(min_length=3, max_length=100)
+    to_id: str = Field(min_length=3, max_length=100)
+
+
 class AdminLogin(BaseModel):
     password: str
 
@@ -100,6 +105,41 @@ def build_router(db, get_entitlement) -> APIRouter:
     @router.get("/access/status")
     async def access_status(app_user_id: str):
         return await compute_access(app_user_id)
+
+    @router.get("/conventions/{code}/info")
+    async def convention_info(code: str):
+        conv = await db.convention_codes.find_one({"code": code.strip().upper()}, {"_id": 0})
+        if not conv or not conv.get("is_active"):
+            raise HTTPException(404, "Codice non valido o non più attivo")
+        return {
+            "code": conv["code"],
+            "cooperative_name": conv["cooperative_name"],
+            "duration_months": conv["duration_months"],
+            "available": conv["current_uses"] < conv["max_uses"],
+        }
+
+    @router.post("/access/migrate")
+    async def migrate_user(payload: MigrateRequest):
+        """Sposta i dati da un ID d'installazione al nuovo ID legato al telefono."""
+        if payload.from_id == payload.to_id:
+            return {"status": "noop"}
+        old = await db.app_users.find_one({"app_user_id": payload.from_id}, {"_id": 0})
+        if not old:
+            return {"status": "noop"}
+        new = await db.app_users.find_one({"app_user_id": payload.to_id}, {"_id": 0})
+        if new:
+            upd = {"trial_started_at": min(old["trial_started_at"], new["trial_started_at"])}
+            if old.get("convention_code") and not new.get("convention_code"):
+                upd.update({k: old[k] for k in ("convention_code", "cooperative_name", "convention_expires_at") if k in old})
+            await db.app_users.update_one({"app_user_id": payload.to_id}, {"$set": upd})
+            await db.app_users.delete_one({"app_user_id": payload.from_id})
+        else:
+            await db.app_users.update_one({"app_user_id": payload.from_id}, {"$set": {"app_user_id": payload.to_id}})
+        for coll in ("convention_redemptions", "handovers"):
+            await db[coll].update_many({"app_user_id": payload.from_id}, {"$set": {"app_user_id": payload.to_id}})
+        if not await db.subscriptions.find_one({"app_user_id": payload.to_id}):
+            await db.subscriptions.update_one({"app_user_id": payload.from_id}, {"$set": {"app_user_id": payload.to_id}})
+        return {"status": "migrated"}
 
     @router.post("/conventions/redeem")
     async def redeem(payload: RedeemRequest):

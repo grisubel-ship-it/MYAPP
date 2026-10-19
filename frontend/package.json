@@ -4,8 +4,10 @@
   "private": true,
   "dependencies": {
     "@capacitor/android": "^6",
+    "@capacitor/app": "^6",
     "@capacitor/cli": "^6",
     "@capacitor/core": "^6",
+    "@capacitor/device": "^6",
     "@capacitor/ios": "^6",
     "@hookform/resolvers": "5.0.1",
     "@radix-ui/react-accordion": "1.2.8",

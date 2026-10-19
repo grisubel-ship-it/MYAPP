@@ -125,3 +125,50 @@ export function pickPackages(offering) {
     pkgs.find((p) => (p.product?.identifier || "").startsWith(id));
   return { monthly: find("MONTHLY", "premium_monthly"), yearly: find("ANNUAL", "premium_yearly") };
 }
+
+// ID legato al telefono (sopravvive alla reinstallazione dell'app)
+let _idReady = null;
+export function initAppUserId() {
+  if (!_idReady) {
+    _idReady = (async () => {
+      if (!isNative()) return getAppUserId();
+      try {
+        const { Device } = await import("@capacitor/device");
+        const { identifier } = await Device.getId();
+        if (!identifier) return getAppUserId();
+        const deviceId = `d_${identifier}`;
+        const current = localStorage.getItem(APP_USER_ID_KEY);
+        if (current && current !== deviceId) {
+          await axios.post(`${API}/access/migrate`, { from_id: current, to_id: deviceId });
+        }
+        localStorage.setItem(APP_USER_ID_KEY, deviceId);
+      } catch (e) {
+        console.warn("[subscription] Device ID non disponibile", e);
+      }
+      return getAppUserId();
+    })();
+  }
+  return _idReady;
+}
+
+// Codice convenzione dal link Google Play (solo al primo avvio dopo l'installazione)
+const REFERRER_DONE_KEY = "cgsync.referrer_checked";
+export async function consumeInstallReferrerCode() {
+  if (!isNative() || localStorage.getItem(REFERRER_DONE_KEY)) return null;
+  localStorage.setItem(REFERRER_DONE_KEY, "1");
+  try {
+    const { registerPlugin } = await import("@capacitor/core");
+    const { referrer } = await registerPlugin("InstallReferrer").getReferrer();
+    return parseCodeFromText(decodeURIComponent(referrer || ""));
+  } catch {
+    return null;
+  }
+}
+
+export function parseCodeFromText(text) {
+  const m = /(?:conv_code=|[?&]code=|\/c\/)([A-Za-z0-9-]{3,40})/.exec(text || "");
+  return m ? m[1].toUpperCase() : null;
+}
+
+export const PLAY_URL = "https://play.google.com/store/apps/details?id=com.caregiversync.app";
+export const playUrlWithCode = (code) => `${PLAY_URL}&referrer=${encodeURIComponent(`conv_code=${code}`)}`;

@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useState } from "react";
 import axios from "axios";
 import { toast } from "sonner";
-import { Lock, LogOut, Plus, Trash2, Users, FileSpreadsheet, FileText } from "lucide-react";
+import { Lock, LogOut, Plus, Trash2, Users, FileSpreadsheet, FileText, Link2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -89,6 +89,16 @@ function CreateForm({ onCreate }) {
   );
 }
 
+async function copyLink(code) {
+  const url = `${window.location.origin}/c/${code}`;
+  try {
+    await navigator.clipboard.writeText(url);
+    toast.success("Link copiato: inviala alla cooperativa", { description: url });
+  } catch {
+    window.prompt("Copia il link:", url);
+  }
+}
+
 function CodeRow({ c, onToggle, onDelete, onDownload }) {
   const full = c.current_uses >= c.max_uses;
   return (
@@ -104,7 +114,10 @@ function CodeRow({ c, onToggle, onDelete, onDownload }) {
           <Users size={12} /> {c.current_uses} / {c.max_uses} attivazioni · {c.duration_months} {c.duration_months === 1 ? "mese" : "mesi"}
         </div>
       </div>
-      <div className="flex items-center gap-2">
+      <div className="flex flex-wrap items-center gap-2">
+        <Button variant="outline" size="sm" onClick={() => copyLink(c.code)} data-testid={`admin-code-link-${c.code}`}>
+          <Link2 size={14} className="mr-1" /> Link
+        </Button>
         <Button variant="outline" size="sm" onClick={() => onDownload(c.code, "report.csv", `attivazioni-${c.code}.csv`)} data-testid={`admin-code-report-${c.code}`}>
           <FileSpreadsheet size={14} className="mr-1" /> Report
         </Button>
