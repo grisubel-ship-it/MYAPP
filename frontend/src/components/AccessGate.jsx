@@ -87,7 +87,7 @@ function TrialEndingDialog({ status }) {
   const days = status.trial_days_left;
   return (
     <Dialog open={open} onOpenChange={(v) => !v && close()}>
-      <DialogContent className="max-w-sm" data-testid="trial-ending-dialog">
+      <DialogContent className="w-[calc(100%-2rem)] max-w-sm rounded-lg" data-testid="trial-ending-dialog">
         <DialogHeader>
           <DialogTitle className="font-serif text-2xl">
             {days === 1 ? "Ultimo giorno di prova" : `Mancano ${days} giorni`}

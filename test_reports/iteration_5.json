@@ -1,0 +1,39 @@
+{
+  "summary": "Iteration 5: tested the admin CSV report, the PDF flyer and the trial-ending reminder. Backend: new file test_admin_reports.py with 13 tests, plus the iteration_4 regression test_access_conventions.py with 16 tests. All 29 pass. report.csv: 401 with no token or a bad token, 404 for an unknown code, and a lowercase code works. It returns text/csv with a UTF-8 BOM, ';' separator and filename attivazioni-CODE.csv. It has the 4 header lines (Cooperativa, Codice, Attivazioni X / Y, Durata), a blank line, then the columns N.;ID utente;Data attivazione;Scadenza Premium;Stato, with one row per redemption in ascending order and Stato=Attivo. A coop name containing ';' is quoted correctly. flyer.pdf: 401 with no token, 404 for an unknown code. It returns application/pdf starting with %PDF, filename volantino-CODE.pdf, one A4 page. I rendered it with PyMuPDF: it shows the coop badge, the code box, the bullets, the QR code, the activation steps and the disclaimer, with no coop logo. Frontend (Playwright): on /admin, the Report and Volantino buttons trigger downloads named attivazioni-AURORA2026.csv and volantino-AURORA2026.pdf with valid content. With u_ending_demo, the dialog 'Mancano 2 giorni' opens and the banner turns red (bg-red-50, text-red-800). 'Più tardi' closes the dialog and sets cgsync.trial_reminder_day, and the dialog does not reappear after reload. After clearing the key, 'Abbonati o usa un codice' goes to /pro. Escape also closes the dialog and sets the key. A fresh user (30 days) gets no dialog and an amber banner. u_expired_demo is still redirected to /pro.",
+  "backend_issues": {
+    "critical": [],
+    "minor": [
+      {"endpoint": "/api/admin/conventions/{code}/flyer.pdf", "issue": "Long coop names or codes overflow the A4 page. The badge 'OFFERTO DA ...', the subtitle and the Courier-Bold 30 code are cut off at the page edges. Coop names can be up to 120 chars and codes up to 40, but anything longer than about 45 chars in the badge or 25 in the code is clipped. Reproduced with build_coop_flyer('Cooperativa Sociale Integrata Servizi Assistenziali Domiciliari del Comune di Reggio Emilia Onlus', 'COOPERATIVASOCIALE-ABCDEF1234567890XYZ', 1)."},
+      {"endpoint": "/api/admin/conventions/{code}/report.csv", "issue": "Data attivazione and Scadenza are formatted in UTC, not Europe/Rome. For example, 07:13 UTC is 09:13 local time, and a date can shift near midnight."}
+    ]
+  },
+  "frontend_issues": {
+    "ui_bugs": [],
+    "integration_issues": [],
+    "design_issues": [
+      {"screen": "Trial-ending dialog (mobile 390px)", "issues": ["The dialog spans almost the full width with about 4px side margin and square corners. Consider w-[calc(100%-2rem)] and rounded-lg."]}
+    ]
+  },
+  "test_report_links": ["/app/backend/tests/test_admin_reports.py", "/app/backend/tests/test_access_conventions.py", "/app/test_reports/pytest/pytest_iter5.xml"],
+  "action_items": [
+    "Flyer: shrink the font to fit (or wrap) for the coop badge, the subtitle and the code box when the text is wider than the page or box",
+    "Optional: format CSV timestamps in Europe/Rome (zoneinfo)",
+    "Optional: compute the reminder day key from the local date instead of toISOString() (UTC). In Italy, between 00:00 and 01:00/02:00 the 'day' is still the previous one",
+    "Optional: in AdminPage download(), append the <a> to document.body and revoke the object URL after a timeout, for Firefox/Safari compatibility"
+  ],
+  "critical_code_review_comments": [
+    "The flyer layout uses fixed font sizes with no text fitting, so long names or codes overflow (see minor issue).",
+    "The reminder key uses the UTC date (new Date().toISOString().slice(0,10)) and not the local date.",
+    "download(): URL.revokeObjectURL is called right after a.click(), and the anchor is never attached to the DOM. This works in Chromium but can break in Firefox/Safari.",
+    "The flyer has to be downloaded by the admin and handed out offline. The CSV exposes only app_user_ids, which is good for GDPR.",
+    "The issues raised in iteration_4 are still open: client-only paywall, resettable trial, unthrottled redeem endpoint, and X-Forwarded-For lockout bypass."
+  ],
+  "updated_files": ["/app/backend/tests/test_admin_reports.py"],
+  "success_rate": {"backend": "100% (29/29)", "frontend": "100%"},
+  "test_credentials": "Admin password CgSync-B7N4D7pf works.",
+  "seed_data_creation": "Created a temporary code TESTRPT* with 2 u_TEST_rpt_* redemptions (the fixture deletes the code). Cleaned up u_TEST_* app_users, TESTRPT redemptions and 10.x login_attempts. AURORA2026, TEST2026, u_demo_a, u_ending_demo and u_expired_demo were left untouched.",
+  "retest_needed": false,
+  "should_main_agent_self_test": true,
+  "context_for_next_testing_agent": "test_admin_reports.py is self-cleaning except for the redemption records. Delete convention_redemptions with code ^TESTRPT and app_users ^u_TEST_ afterwards. The server date is 2026-10-19. u_ending_demo has 2 days left, which will drift over time. test_caregiver_api.py was not rerun because it wipes patients and entries, and nothing in that area changed.",
+  "rca of the issue": "Flyer overflow: flyer.py uses drawCentredString with a fixed font size. The badge width is capped (min(PAGE_W-80, ...)) but the text is not, so long strings run past the page."
+}

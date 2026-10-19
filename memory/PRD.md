@@ -83,3 +83,9 @@ App per la gestione della cura di anziani e persone cronicamente malate ("Caregi
 - P1: offerte iOS in RevenueCat (chiave Apple) e build su Mac
 - P1: trial legato all'account Google (oggi per installazione: reinstallando riparte)
 - P2: export CSV attivazioni per cooperativa
+
+## v1.4.1 (2026-10)
+- Admin: download **CSV attivazioni** per codice (`/api/admin/conventions/{code}/report.csv`, separatore `;`, orari Europe/Rome) e **volantino PDF** per cooperativa con codice stampato (`/flyer.pdf`, `backend/flyer.py`, logo in `backend/assets/`; testi lunghi rimpiccioliti automaticamente).
+- Avviso fine prova: negli ultimi 3 giorni finestra all'apertura (1 volta al giorno, `cgsync.trial_reminder_day`) + banner rosso.
+- Testing iter. 5: 29/29 backend, frontend OK; minor fix applicati (overflow PDF, fuso orario, larghezza dialog mobile).
+- AAB/APK v1.4.1 (versionCode 19); iOS 1.4.1 build 7 in ios-project.zip.

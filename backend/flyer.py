@@ -37,6 +37,12 @@ def _wrap(c, text, font, size, max_w):
     return lines + ([line] if line else [])
 
 
+def _fit(c, text, font, size, max_w, min_size=7):
+    while size > min_size and c.stringWidth(text, font, size) > max_w:
+        size -= 0.5
+    return size
+
+
 def _qr():
     qr = qrcode.QRCode(error_correction=qrcode.constants.ERROR_CORRECT_H, box_size=20, border=2)
     qr.add_data(PLAY_URL)
@@ -56,8 +62,9 @@ def build_coop_flyer(cooperative_name: str, code: str, duration_months: int) -> 
     c.drawImage(ImageReader(str(LOGO)), 0, PAGE_H - banner_h, width=PAGE_W, height=banner_h, mask="auto")
 
     badge = f"OFFERTO DA {cooperative_name.upper()}"
-    c.setFont("Helvetica-Bold", 11)
-    bw = min(PAGE_W - 80, c.stringWidth(badge, "Helvetica-Bold", 11) + 40)
+    bsize = _fit(c, badge, "Helvetica-Bold", 11, PAGE_W - 120)
+    c.setFont("Helvetica-Bold", bsize)
+    bw = min(PAGE_W - 80, c.stringWidth(badge, "Helvetica-Bold", bsize) + 40)
     by = PAGE_H - banner_h - 22
     c.setFillColor(AMBER)
     c.roundRect((PAGE_W - bw) / 2, by, bw, 28, 14, fill=1, stroke=0)
@@ -70,9 +77,10 @@ def build_coop_flyer(cooperative_name: str, code: str, duration_months: int) -> 
     c.drawCentredString(PAGE_W / 2, y, "Il diario di cura per tutta la famiglia")
     y -= 22
     c.setFillColor(STONE_500)
-    c.setFont("Helvetica", 12)
     mesi = "mese" if duration_months == 1 else "mesi"
-    c.drawCentredString(PAGE_W / 2, y, f"Premium gratuito per {duration_months} {mesi} grazie a {cooperative_name}")
+    sub = f"Premium gratuito per {duration_months} {mesi} grazie a {cooperative_name}"
+    c.setFont("Helvetica", _fit(c, sub, "Helvetica", 12, PAGE_W - 80))
+    c.drawCentredString(PAGE_W / 2, y, sub)
 
     # Box codice
     y -= 110
@@ -87,7 +95,7 @@ def build_coop_flyer(cooperative_name: str, code: str, duration_months: int) -> 
     c.setFont("Helvetica-Bold", 11)
     c.drawCentredString(PAGE_W / 2, y + box_h - 22, "IL TUO CODICE CONVENZIONE")
     c.setFillColor(STONE_900)
-    c.setFont("Courier-Bold", 30)
+    c.setFont("Courier-Bold", _fit(c, code, "Courier-Bold", 30, box_w - 30, 10))
     c.drawCentredString(PAGE_W / 2, y + 26, code)
 
     # Bullet a sinistra
@@ -127,7 +135,7 @@ def build_coop_flyer(cooperative_name: str, code: str, duration_months: int) -> 
     steps = [
         "Scarica Caregiver Sync da Google Play",
         "Tocca Premium in alto a destra",
-        f"Inserisci il codice {code} e tocca Attiva",
+        "Inserisci il codice qui sopra e tocca Attiva",
     ]
     c.setFont("Helvetica", 11)
     for i, s in enumerate(steps, 1):

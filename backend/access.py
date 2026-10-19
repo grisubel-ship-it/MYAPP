@@ -4,6 +4,7 @@ import math
 import secrets
 from datetime import datetime, timezone, timedelta
 from typing import Optional
+from zoneinfo import ZoneInfo
 
 import csv
 import io
@@ -234,13 +235,14 @@ def build_router(db, get_entitlement) -> APIRouter:
         w.writerow([])
         w.writerow(["N.", "ID utente", "Data attivazione", "Scadenza Premium", "Stato"])
         now = _now()
+        rome = ZoneInfo("Europe/Rome")
         for i, r in enumerate(rows, 1):
             exp = _parse(r.get("expires_at"))
             w.writerow([
                 i,
                 r["app_user_id"],
-                _parse(r["redeemed_at"]).strftime("%d/%m/%Y %H:%M"),
-                exp.strftime("%d/%m/%Y") if exp else "",
+                _parse(r["redeemed_at"]).astimezone(rome).strftime("%d/%m/%Y %H:%M"),
+                exp.astimezone(rome).strftime("%d/%m/%Y") if exp else "",
                 "Attivo" if exp and exp > now else "Scaduto",
             ])
         data = "\ufeff" + out.getvalue()
