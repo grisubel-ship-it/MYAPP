@@ -5,9 +5,14 @@ import secrets
 from datetime import datetime, timezone, timedelta
 from typing import Optional
 
+import csv
+import io
+
 import jwt
-from fastapi import APIRouter, HTTPException, Request, Depends
+from fastapi import APIRouter, HTTPException, Request, Depends, Response
 from pydantic import BaseModel, Field
+
+from flyer import build_coop_flyer
 
 TRIAL_DAYS = 30
 JWT_ALGORITHM = "HS256"
@@ -209,5 +214,44 @@ def build_router(db, get_entitlement) -> APIRouter:
     @router.get("/admin/conventions/{code}/redemptions", dependencies=[Depends(require_admin)])
     async def redemptions(code: str):
         return await db.convention_redemptions.find({"code": code.upper()}, {"_id": 0}).sort("redeemed_at", -1).to_list(5000)
+
+    async def _conv_or_404(code: str) -> dict:
+        conv = await db.convention_codes.find_one({"code": code.upper()}, {"_id": 0})
+        if not conv:
+            raise HTTPException(404, "Codice non trovato")
+        return conv
+
+    @router.get("/admin/conventions/{code}/report.csv", dependencies=[Depends(require_admin)])
+    async def report_csv(code: str):
+        conv = await _conv_or_404(code)
+        rows = await db.convention_redemptions.find({"code": conv["code"]}, {"_id": 0}).sort("redeemed_at", 1).to_list(100000)
+        out = io.StringIO()
+        w = csv.writer(out, delimiter=";")
+        w.writerow(["Cooperativa", conv["cooperative_name"]])
+        w.writerow(["Codice", conv["code"]])
+        w.writerow(["Attivazioni", f"{conv['current_uses']} / {conv['max_uses']}"])
+        w.writerow(["Durata Premium (mesi)", conv["duration_months"]])
+        w.writerow([])
+        w.writerow(["N.", "ID utente", "Data attivazione", "Scadenza Premium", "Stato"])
+        now = _now()
+        for i, r in enumerate(rows, 1):
+            exp = _parse(r.get("expires_at"))
+            w.writerow([
+                i,
+                r["app_user_id"],
+                _parse(r["redeemed_at"]).strftime("%d/%m/%Y %H:%M"),
+                exp.strftime("%d/%m/%Y") if exp else "",
+                "Attivo" if exp and exp > now else "Scaduto",
+            ])
+        data = "\ufeff" + out.getvalue()
+        return Response(data, media_type="text/csv; charset=utf-8", headers={
+            "Content-Disposition": f'attachment; filename="attivazioni-{conv["code"]}.csv"'})
+
+    @router.get("/admin/conventions/{code}/flyer.pdf", dependencies=[Depends(require_admin)])
+    async def coop_flyer(code: str):
+        conv = await _conv_or_404(code)
+        pdf = build_coop_flyer(conv["cooperative_name"], conv["code"], conv["duration_months"])
+        return Response(pdf, media_type="application/pdf", headers={
+            "Content-Disposition": f'attachment; filename="volantino-{conv["code"]}.pdf"'})
 
     return router

@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useState } from "react";
 import axios from "axios";
 import { toast } from "sonner";
-import { Lock, LogOut, Plus, Trash2, Users } from "lucide-react";
+import { Lock, LogOut, Plus, Trash2, Users, FileSpreadsheet, FileText } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -89,7 +89,7 @@ function CreateForm({ onCreate }) {
   );
 }
 
-function CodeRow({ c, onToggle, onDelete }) {
+function CodeRow({ c, onToggle, onDelete, onDownload }) {
   const full = c.current_uses >= c.max_uses;
   return (
     <div className="p-3 rounded-lg border border-stone-200 flex flex-wrap items-center gap-3 justify-between" data-testid={`admin-code-row-${c.code}`}>
@@ -105,6 +105,12 @@ function CodeRow({ c, onToggle, onDelete }) {
         </div>
       </div>
       <div className="flex items-center gap-2">
+        <Button variant="outline" size="sm" onClick={() => onDownload(c.code, "report.csv", `attivazioni-${c.code}.csv`)} data-testid={`admin-code-report-${c.code}`}>
+          <FileSpreadsheet size={14} className="mr-1" /> Report
+        </Button>
+        <Button variant="outline" size="sm" onClick={() => onDownload(c.code, "flyer.pdf", `volantino-${c.code}.pdf`)} data-testid={`admin-code-flyer-${c.code}`}>
+          <FileText size={14} className="mr-1" /> Volantino
+        </Button>
         <Switch checked={c.is_active} onCheckedChange={(v) => onToggle(c.code, v)} data-testid={`admin-code-toggle-${c.code}`} />
         <Button variant="ghost" size="icon" onClick={() => onDelete(c.code)} aria-label="Elimina" data-testid={`admin-code-delete-${c.code}`}>
           <Trash2 size={16} className="text-red-600" />
@@ -151,6 +157,21 @@ export default function AdminPage() {
     load();
   }, [load]);
 
+  const download = async (code, file, filename) => {
+    try {
+      const { data } = await axios.get(`${API}/admin/conventions/${code}/${file}`, { ...auth, responseType: "blob" });
+      const url = URL.createObjectURL(data);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = filename;
+      a.click();
+      URL.revokeObjectURL(url);
+    } catch (err) {
+      if (err?.response?.status === 401) logout();
+      toast.error("Download non riuscito");
+    }
+  };
+
   if (!token) return <AdminLogin onLogin={setToken} />;
 
   return (
@@ -168,6 +189,7 @@ export default function AdminPage() {
             <CodeRow
               key={c.code}
               c={c}
+              onDownload={download}
               onToggle={(code, v) => call(() => axios.patch(`${API}/admin/conventions/${code}`, { is_active: v }, auth))}
               onDelete={(code) => window.confirm(`Eliminare il codice ${code}?`) && call(() => axios.delete(`${API}/admin/conventions/${code}`, auth), "Codice eliminato")}
             />
