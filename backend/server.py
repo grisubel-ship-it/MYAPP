@@ -569,6 +569,8 @@ ALLOWED_DOWNLOADS = {
     "caregiver-sync-v1.3.0.apk": "application/vnd.android.package-archive",
     "caregiver-sync-v1.3.1.aab": "application/octet-stream",
     "caregiver-sync-v1.3.1.apk": "application/vnd.android.package-archive",
+    "caregiver-sync-v1.4.0.aab": "application/octet-stream",
+    "caregiver-sync-v1.4.0.apk": "application/vnd.android.package-archive",
     "caregiver-sync-v1.3.2.aab": "application/octet-stream",
     "caregiver-sync-v1.3.2.apk": "application/vnd.android.package-archive",
     "google-play-kit-v1.3.1.zip": "application/zip",

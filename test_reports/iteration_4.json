@@ -1,0 +1,39 @@
+{
+  "summary": "Iteration 4: tested the convention code system, the 30-day trial and the paywall. Backend: new file test_access_conventions.py with 16 pytest tests, all passing. It covers trial creation on first call (reason=trial, 30 days left, same result on repeat calls), u_expired_demo -> access=false/expired, admin login 200/401, lockout (5 wrong attempts -> 429, and the correct password is also rejected during lockout, checked with a separate X-Forwarded-For), admin endpoints without a token or with a bad token -> 401, create code (custom lowercase saved as uppercase; auto-generated PREFIX-XXXXXX), duplicate -> 409, list (no _id), PATCH is_active persisted, DELETE then second DELETE -> 404, invalid payload -> 422. Redeem: case-insensitive and whitespace-trimmed, invalid code -> 404, inactive code -> 404, max_uses reached -> 409, same user redeeming twice -> already_redeemed with no second use counted (current_uses=1), expires_at within 2 minutes of now+60 days for a 2-month code, redemptions list correct. /ai/handover with u_expired_demo -> 402 with detail.code=pro_required. Regression test_caregiver_api.py: 22/22 pass. Frontend (Playwright): an expired user on /, /paziente/x, /impostazioni and /nuovo is redirected to /pro with no back link. /pro shows the expired card, both plans (€49,90 / anno, €4,99 / mese), buy buttons disabled on web, the web billing note and the convention card; an invalid code shows the error toast. Redeeming a valid code in lowercase moves the status card to 'Premium tramite <coop>' with the expiry date, hides the plans, shows the back link, and home becomes reachable. A new user sees the banner 'Prova gratuita: 30 giorni rimasti' with a CTA to /pro (CTA hidden on /pro; banner hidden on /admin). Trial user regression: patient creation and adding a diary entry work. /admin: wrong password toast, login, create custom and auto codes, usage shown as 'X / Y attivazioni', duplicate toast, toggle switch (checked -> unchecked, 'Disattivato' badge), delete (confirm accepted), session kept after reload, logout.",
+  "backend_issues": {"critical": [], "minor": []},
+  "frontend_issues": {
+    "ui_bugs": [],
+    "integration_issues": [],
+    "design_issues": [
+      {"screen": "/admin code row", "issues": ["Wrong plural: '1 mesi' should be '1 mese' when duration_months == 1"]}
+    ]
+  },
+  "test_report_links": [
+    "/app/backend/tests/test_access_conventions.py",
+    "/app/backend/tests/test_caregiver_api.py",
+    "/app/test_reports/pytest/pytest_access.xml"
+  ],
+  "action_items": [
+    "Optional: fix the '1 mesi' plural in the AdminPage usage line",
+    "Consider the paywall weaknesses listed in code review (client-side only gating, resettable trial)"
+  ],
+  "critical_code_review_comments": [
+    "The paywall is enforced only by the frontend (AccessGate). The backend checks access only on /ai/handover. /patients, /entries, /trend etc. are open to expired users, so anyone calling the API directly gets the full app. Acceptable for an MVP, but be aware of it.",
+    "The trial is keyed on a client-generated app_user_id in localStorage. Clearing app data, reinstalling, or sending any new app_user_id gives a fresh 30-day trial. Consider tying it to the RevenueCat anonymous ID plus a device ID, or to Play Integrity.",
+    "/ai/handover skips gating entirely when app_user_id is omitted (the field is optional). A caller can simply leave it out to bypass the 402. Make it required, or treat a missing ID as no access.",
+    "The redeem endpoint has no rate limit, so codes can be brute-forced. Auto codes are prefix + 6 hex chars (16.7M combinations) and custom codes like TEST2026 are guessable. Add per-IP throttling.",
+    "Redeeming a different code while a convention is active overwrites the current convention, even if it is shorter, and uses up a slot. Consider blocking this or keeping the later expiry.",
+    "Admin lockout trusts the client-supplied X-Forwarded-For header. An attacker can rotate the header to get unlimited password attempts. Use the rightmost or ingress-trusted IP, or also add a global counter.",
+    "The admin token is stored in sessionStorage (no httpOnly cookie). This is fine for a single-password internal admin page.",
+    "AccessGate fails open on network errors (reason=offline -> access=true). Intentional, but it also means blocking the API grants access.",
+    "App.js is still about 1480 lines; splitting it is overdue."
+  ],
+  "updated_files": ["/app/backend/tests/test_access_conventions.py"],
+  "success_rate": {"backend": "100% (16/16 new + 22/22 regression)", "frontend": "100%"},
+  "test_credentials": "Admin password CgSync-B7N4D7pf (from /app/memory/test_credentials.md) works.",
+  "seed_data_creation": "Created temporary codes TESTUI01, TESTADMUI and TESTAU-*, the user u_TEST_expired_ui (expired, inserted directly in Mongo), TEST_ app_users and the patient TEST_Nonna Trial. All were cleaned up afterwards. TEST2026 and u_expired_demo were left untouched. Test login_attempts records for 10.x IPs were removed.",
+  "retest_needed": false,
+  "should_main_agent_self_test": true,
+  "context_for_next_testing_agent": "test_access_conventions.py cleans up its own codes (module fixture). It uses random X-Forwarded-For 10.x.x.x IPs to avoid locking the real IP. To create an expired user for UI tests, insert into db.app_users {app_user_id, trial_started_at: '2025-01-01T00:00:00+00:00'}. Run test_caregiver_api.py with -n0 because it wipes patients and entries. The server date in this environment is October 2026.",
+  "rca of the issue": "N/A - no functional bugs found."
+}

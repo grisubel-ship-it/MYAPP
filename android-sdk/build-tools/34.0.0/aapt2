@@ -1,2 +1,2 @@
 #!/bin/bash
-exec /usr/bin/qemu-x86_64-static "$(dirname "$0")/aapt2.x86_64" "$@"
+exec /usr/bin/qemu-x86_64-static -L /app/x86root "$(dirname "$0")/aapt2.x86_64" "$@"

@@ -67,3 +67,19 @@ App per la gestione della cura di anziani e persone cronicamente malate ("Caregi
 - ✅ PRIVACY_POLICY.md GDPR-compliant con clausola IA
 - ✅ Keystore salvata + credenziali documentate in README.md
 - ⏳ **Da fare dall'utente**: caricare l'AAB v1.2.3 su Play Console (Internal testing → Production), pubblicare privacy policy URL, caricare screenshot 1080×1920, submit release, configurare RevenueCat con le chiavi reali.
+
+## v1.4.0 — Convenzioni + Paywall (2026-10)
+- Prova gratuita 30 giorni gestita dall'app (senza carta), poi **tutta l'app bloccata** → redirect a /pro (`AccessGate`, `TrialBanner`).
+- Paywall `/pro` (`src/pages/ProPage.jsx`): piani Annuale €49,90 / Mensile €4,99 via RevenueCat (product id `premium_monthly`, `premium_yearly`, entitlement `pro_access`), init RC differita solo qui; ripristina acquisti; campo codice convenzione.
+- Codici convenzione: collezioni `convention_codes` {code, cooperative_name, max_uses, current_uses, duration_months, is_active}, `convention_redemptions`, `app_users` {app_user_id, trial_started_at, convention_*}. Backend in `backend/access.py`.
+- Admin `/admin` protetto da password (`ADMIN_PASSWORD`, JWT `JWT_SECRET` in backend/.env, lockout 5 tentativi/15 min).
+- `/api/ai/handover` → 402 se accesso scaduto.
+- Testing agent iter. 4: backend 16/16 + regressione 22/22, frontend tutto OK.
+- Build: AAB/APK v1.4.0 (versionCode 18) in /app/release; iOS progetto aggiornato (1.4.0 build 6) in ios-project.zip (compilazione richiede Mac).
+- Build note: aapt2 x86 via qemu ora usa `-L /app/x86root` (libc amd64 estratte). Build frontend per APK: passare esplicitamente REACT_APP_BACKEND_URL di produzione (l'env del processo sovrascrive .env.production).
+- ⚠️ Serve **redeploy backend produzione** + aggiungere JWT_SECRET/ADMIN_PASSWORD ai secret di produzione.
+
+### Backlog
+- P1: offerte iOS in RevenueCat (chiave Apple) e build su Mac
+- P1: trial legato all'account Google (oggi per installazione: reinstallando riparte)
+- P2: export CSV attivazioni per cooperativa

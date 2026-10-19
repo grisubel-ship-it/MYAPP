@@ -101,7 +101,7 @@ function CodeRow({ c, onToggle, onDelete }) {
         </div>
         <div className="text-sm text-stone-600 truncate">{c.cooperative_name}</div>
         <div className="text-xs text-stone-500 flex items-center gap-1" data-testid={`admin-code-usage-${c.code}`}>
-          <Users size={12} /> {c.current_uses} / {c.max_uses} attivazioni · {c.duration_months} mesi
+          <Users size={12} /> {c.current_uses} / {c.max_uses} attivazioni · {c.duration_months} {c.duration_months === 1 ? "mese" : "mesi"}
         </div>
       </div>
       <div className="flex items-center gap-2">
