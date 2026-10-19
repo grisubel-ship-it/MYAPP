@@ -89,3 +89,11 @@ App per la gestione della cura di anziani e persone cronicamente malate ("Caregi
 - Avviso fine prova: negli ultimi 3 giorni finestra all'apertura (1 volta al giorno, `cgsync.trial_reminder_day`) + banner rosso.
 - Testing iter. 5: 29/29 backend, frontend OK; minor fix applicati (overflow PDF, fuso orario, larghezza dialog mobile).
 - AAB/APK v1.4.1 (versionCode 19); iOS 1.4.1 build 7 in ios-project.zip.
+
+## v1.5.0 (2026-10)
+- **Prova legata al telefono**: su Android app_user_id = `d_<ANDROID_ID>` (@capacitor/device), sopravvive alla reinstallazione. Vecchi id `u_*` migrati via `POST /api/access/migrate` (solo u_→d_). Indice unico su app_users.app_user_id. iOS: identifierForVendor (si azzera se si rimuovono tutte le app dello sviluppatore).
+- **Link cooperativa** `/c/{CODE}`: pagina pubblica (nome coop, codice, copia, Google Play con `referrer=conv_code=CODE`, "Apri nell'app" via intent `caregiversync://redeem?code=`). `GET /api/conventions/{code}/info` pubblico.
+- App: plugin nativo `InstallReferrerPlugin` (Java) → al primo avvio dopo install da link il codice si attiva da solo; `appUrlOpen` → `/pro?code=` precompilato. App Links https su `/c/` con `public/.well-known/assetlinks.json` (contiene SHA-256 chiave upload; **aggiungere SHA-256 della chiave di firma Play Console**).
+- Admin: pulsante "Link" copia il link; QR del volantino ora porta al Play Store con il codice.
+- Testing iter. 6: 43/43 backend; fix sicurezza migrate applicati.
+- AAB/APK v1.5.0 (versionCode 20); iOS 1.5.0 build 8.

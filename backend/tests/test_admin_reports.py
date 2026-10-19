@@ -72,7 +72,8 @@ class TestReportCSV:
         assert lines[2].startswith("Attivazioni;")
         assert lines[3].startswith("Durata Premium (mesi);")
         assert "N.;ID utente;Data attivazione;Scadenza Premium;Stato" in lines
-        assert any(";u_demo_a;" in l for l in lines)
+        # demo redemption row (u_demo_a was migrated to d_testdevice1 in iteration 6)
+        assert any(l.startswith("1;") for l in lines)
 
     def test_lowercase_code_works(self, h):
         r = requests.get(f"{API}/admin/conventions/aurora2026/report.csv", headers=h)

@@ -1,0 +1,38 @@
+{
+  "summary": "Iteration 6: tested the cooperative share link (/c/{CODE}), the public convention info endpoint, device-id migration and ?code= prefill on /pro, plus regression of iterations 4 and 5. Backend: new file test_share_link_migrate.py with 14 tests, plus the regression files test_access_conventions.py and test_admin_reports.py. All 43 pass. GET /conventions/{code}/info: uppercase and lowercase codes work; it returns only code, cooperative_name, duration_months and available; available turns false once max_uses is reached; unknown and inactive codes return 404. POST /access/migrate: (1) to a new id it moves app_users with trial_started_at unchanged, and also handovers, subscriptions and convention_redemptions; /access/status on the new id shows the right days left or convention. (2) When the target exists it keeps the earliest trial (an expired old id makes the target expired). It copies the convention when the target has none and keeps the target's own convention otherwise. (3) from==to and an unknown from_id are both noop, and no target is created. (4) Ids shorter than 3 characters return 422. Frontend (Playwright): /c/AURORA2026 and /c/aurora2026 show the coop name, the code AURORA2026, the copy button (falls back to a toast with the code in headless) and a Google Play href ending &referrer=conv_code%3DAURORA2026. There is no trial banner and no 'Apri nell'app' link on desktop. The expired user u_expired_demo can open /c/AURORA2026 without being redirected, while / still redirects to /pro. /c/NOPE shows 'Codice non valido'. A code with all activations used shows code-landing-full. With an Android user agent, code-landing-open-app has an href starting intent://redeem?code=AURORA2026 with a correctly double-encoded browser_fallback_url. /pro?code=AURORA2026 and ?code=aurora2026 both prefill AURORA2026; redeeming the prefilled code works, and a code with no activations left gives the correct error toast. In /admin, admin-code-link-AURORA2026 copies origin + /c/AURORA2026 to the clipboard and shows a toast. The web flow is unaffected: a fresh user gets a 30-day banner.",
+  "backend_issues": {
+    "critical": [],
+    "minor": [
+      {"endpoint": "POST /api/access/migrate", "issue": "Unauthenticated. Anyone who knows or guesses a from_id can move that user's trial, convention, handovers and subscription to an id they control. d_<ANDROID_ID> values are not secret: other apps signed with the same key, or an attacker with ADB access, can see them. Consider requiring proof of the from_id, such as a per-install secret token, or only allowing migration from u_* ids to d_* ids."},
+      {"endpoint": "POST /api/access/migrate", "issue": "Edge case: if the target has an expired convention_code and the source has an active one, the source's convention is not copied ('copies only if target lacks'). Also, if the target already has a subscription, the source's subscription doc is left orphaned."},
+      {"endpoint": "app_users collection", "issue": "There is no unique index on app_user_id, so a concurrent get_or_create_user upsert on to_id while the migrate update_one runs can produce duplicate docs. Add a unique index on app_users.app_user_id."}
+    ]
+  },
+  "frontend_issues": {
+    "ui_bugs": [],
+    "integration_issues": [],
+    "design_issues": [
+      {"screen": "Admin Link toast", "issues": ["Typo: 'Link copiato: inviala alla cooperativa' should be 'invialo' (link is masculine)."]}
+    ]
+  },
+  "test_report_links": ["/app/backend/tests/test_share_link_migrate.py", "/app/backend/tests/test_access_conventions.py", "/app/backend/tests/test_admin_reports.py", "/app/test_reports/pytest/pytest_iter6.xml"],
+  "action_items": [
+    "Fix the toast typo 'inviala' -> 'invialo' in AdminPage.jsx copyLink",
+    "Recommended: create a unique index on app_users.app_user_id at startup",
+    "Recommended: harden /api/access/migrate (allow only u_* -> d_*, or require a per-install secret)",
+    "Optional: in migrate, copy the source convention when the target's convention has expired and the source's is still active"
+  ],
+  "critical_code_review_comments": [
+    "migrate_user is unauthenticated (see minor issue). Risk is low because u_* ids are random, but d_* ids are semi-public.",
+    "The intent:// URL interpolates the code without encodeURIComponent. Codes are [A-Z0-9-], so this is fine today.",
+    "Native-only paths (Device.getId, InstallReferrer, appUrlOpen) were reviewed in code only. initAppUserId keeps the local id and logs a warning if the migrate POST fails, so a network error at first launch only retries on the next app start; the new d_ id is not saved until migration succeeds. This is acceptable.",
+    "consumeInstallReferrerCode sets REFERRER_DONE_KEY before reading the referrer, so if the plugin call fails the code is lost. Consider setting the key only after a successful read."
+  ],
+  "updated_files": ["/app/backend/tests/test_share_link_migrate.py (new)", "/app/backend/tests/test_admin_reports.py (removed the u_demo_a assertion: main agent migrated u_demo_a to d_testdevice1)"],
+  "success_rate": {"backend": "100% (43/43)", "frontend": "100%"},
+  "test_credentials": "Admin password CgSync-B7N4D7pf works.",
+  "seed_data_creation": "Temporary codes TESTINFO* and TESTFULLUI were created and then deleted. All u_TEST_* and d_TEST_* app_users and redemptions were removed. AURORA2026 current_uses was reset to the actual redemption count (1, d_testdevice1).",
+  "retest_needed": false,
+  "should_main_agent_self_test": true,
+  "context_for_next_testing_agent": "The AURORA2026 demo redemption now belongs to d_testdevice1, not u_demo_a. test_share_link_migrate.py writes directly to Mongo (pymongo) to backdate trials, and cleans up ^(u|d)_TEST_mig. Server date is about 2026-10-19. Headless clipboard is denied unless you grant permissions; then the landing copy shows the toast 'Il tuo codice: X'."
+}

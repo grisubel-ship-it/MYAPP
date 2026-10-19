@@ -102,6 +102,11 @@ def build_router(db, get_entitlement) -> APIRouter:
 
     router.compute_access = compute_access
 
+    @router.on_event("startup")
+    async def _indexes():
+        await db.app_users.create_index("app_user_id", unique=True)
+        await db.convention_codes.create_index("code", unique=True)
+
     @router.get("/access/status")
     async def access_status(app_user_id: str):
         return await compute_access(app_user_id)
@@ -121,15 +126,17 @@ def build_router(db, get_entitlement) -> APIRouter:
     @router.post("/access/migrate")
     async def migrate_user(payload: MigrateRequest):
         """Sposta i dati da un ID d'installazione al nuovo ID legato al telefono."""
-        if payload.from_id == payload.to_id:
-            return {"status": "noop"}
+        if not (payload.from_id.startswith("u_") and payload.to_id.startswith("d_")):
+            raise HTTPException(422, "Migrazione non consentita")
         old = await db.app_users.find_one({"app_user_id": payload.from_id}, {"_id": 0})
         if not old:
             return {"status": "noop"}
         new = await db.app_users.find_one({"app_user_id": payload.to_id}, {"_id": 0})
         if new:
             upd = {"trial_started_at": min(old["trial_started_at"], new["trial_started_at"])}
-            if old.get("convention_code") and not new.get("convention_code"):
+            old_exp = _parse(old.get("convention_expires_at"))
+            new_exp = _parse(new.get("convention_expires_at"))
+            if old_exp and (not new_exp or old_exp > new_exp):
                 upd.update({k: old[k] for k in ("convention_code", "cooperative_name", "convention_expires_at") if k in old})
             await db.app_users.update_one({"app_user_id": payload.to_id}, {"$set": upd})
             await db.app_users.delete_one({"app_user_id": payload.from_id})

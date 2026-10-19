@@ -93,7 +93,7 @@ async function copyLink(code) {
   const url = `${window.location.origin}/c/${code}`;
   try {
     await navigator.clipboard.writeText(url);
-    toast.success("Link copiato: inviala alla cooperativa", { description: url });
+    toast.success("Link copiato: invialo alla cooperativa", { description: url });
   } catch {
     window.prompt("Copia il link:", url);
   }
