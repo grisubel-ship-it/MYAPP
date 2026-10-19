@@ -97,3 +97,4 @@ App per la gestione della cura di anziani e persone cronicamente malate ("Caregi
 - Admin: pulsante "Link" copia il link; QR del volantino ora porta al Play Store con il codice.
 - Testing iter. 6: 43/43 backend; fix sicurezza migrate applicati.
 - AAB/APK v1.5.0 (versionCode 20); iOS 1.5.0 build 8.
+- 2026-10 v1.5.1: minSdkVersion 23→24 (richiesto da Protezione automatica Play), versionCode 21.
