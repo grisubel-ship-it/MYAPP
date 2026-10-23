@@ -4,7 +4,7 @@
 | Campo | Valore |
 |---|---|
 | **Nome** (max 30) | `Caregiver Sync: Diario di Cura` (30 caratteri esatti) |
-| **Sottotitolo** (max 30) | `Note e consegne tra i turni` |
+| **Sottotitolo** (max 30) | `Anziani & Cronici` |
 | **Nome sotto l'icona** | `Caregiver Sync` (già impostato nel progetto) |
 | **Bundle ID** | `com.caregiversync.app` |
 | **SKU** | `caregiversync-diariocura` |
