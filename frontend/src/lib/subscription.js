@@ -6,7 +6,11 @@ import axios from "axios";
 
 const API = `${process.env.REACT_APP_BACKEND_URL}/api`;
 const APP_USER_ID_KEY = "cgsync.app_user_id";
-const RC_ANDROID_KEY = process.env.REACT_APP_RC_ANDROID_KEY || "";
+const RC_KEYS = {
+  android: process.env.REACT_APP_RC_ANDROID_KEY || "",
+  ios: process.env.REACT_APP_RC_IOS_KEY || "",
+};
+const rcKey = () => RC_KEYS[window.Capacitor?.getPlatform?.()] || "";
 
 // Rileva se siamo nell'app nativa Capacitor
 export function isNative() {
@@ -31,15 +35,15 @@ export function getAppUserId() {
 let _rcConfigured = false;
 export async function configureRevenueCat() {
   if (!isNative() || _rcConfigured) return;
-  if (!RC_ANDROID_KEY) {
-    console.warn("[subscription] REACT_APP_RC_ANDROID_KEY non configurata — paywall in modalità demo");
+  if (!rcKey()) {
+    console.warn("[subscription] chiave RevenueCat non configurata per questa piattaforma — paywall in modalità demo");
     return;
   }
   try {
     const { Purchases, LOG_LEVEL } = await import("@revenuecat/purchases-capacitor");
     await Purchases.setLogLevel({ level: LOG_LEVEL.INFO });
     await Purchases.configure({
-      apiKey: RC_ANDROID_KEY,
+      apiKey: rcKey(),
       appUserID: getAppUserId(),
     });
     _rcConfigured = true;

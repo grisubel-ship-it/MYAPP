@@ -591,6 +591,7 @@ ALLOWED_DOWNLOADS = {
     "PRIVACY_POLICY.md": "text/markdown; charset=utf-8",
     "SUBSCRIPTIONS_SETUP.md": "text/markdown; charset=utf-8",
     "ios-project.zip": "application/zip",
+    "APP_STORE_LISTING.md": "text/markdown; charset=utf-8",
     "IOS_BUILD_GUIDE.md": "text/markdown; charset=utf-8",
     "FIVERR_UPWORK_JOB.md": "text/markdown; charset=utf-8",
     "volantino-caregiver-sync-playstore.pdf": "application/pdf",

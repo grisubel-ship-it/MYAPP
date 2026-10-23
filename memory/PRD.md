@@ -98,3 +98,4 @@ App per la gestione della cura di anziani e persone cronicamente malate ("Caregi
 - Testing iter. 6: 43/43 backend; fix sicurezza migrate applicati.
 - AAB/APK v1.5.0 (versionCode 20); iOS 1.5.0 build 8.
 - 2026-10 v1.5.1: minSdkVersion 23→24 (richiesto da Protezione automatica Play), versionCode 21.
+- 2026-10 iOS: nome App Store 'Caregiver Sync: Diario di Cura' (30 car.), build 9, supporto REACT_APP_RC_IOS_KEY, ITSAppUsesNonExemptEncryption=NO; zip ora include sorgente web + APP_STORE_LISTING.md.
