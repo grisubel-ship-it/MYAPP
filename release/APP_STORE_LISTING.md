@@ -1,19 +1,19 @@
-# Scheda App Store — Caregiver Sync: Diario di Cura
+# Scheda App Store — Caregiver Senior
 
 ## Dati app (App Store Connect → Informazioni app)
 | Campo | Valore |
 |---|---|
-| **Nome** (max 30) | `Caregiver Sync: Diario di Cura` (30 caratteri esatti) |
+| **Nome** (max 30) | `Caregiver Senior` (16 caratteri) |
 | **Sottotitolo** (max 30) | `Anziani & Cronici` |
-| **Nome sotto l'icona** | `Caregiver Sync` (già impostato nel progetto) |
+| **Nome sotto l'icona** | `Caregiver Senior` (già impostato nel progetto) |
 | **Bundle ID** | `com.caregiversync.app` |
-| **SKU** | `caregiversync-diariocura` |
+| **SKU** | `caregiversenior` |
 | **Lingua principale** | Italiano |
 | **Categoria principale** | Salute e fitness |
 | **Categoria secondaria** | Lifestyle |
 | **Classificazione età** | 4+ (nessun contenuto sensibile) |
-| **Copyright** | `2026 Caregiver Sync` |
-| **Versione / Build** | 1.5.0 / 9 |
+| **Copyright** | `2026 Caregiver Senior` |
+| **Versione / Build** | 1.6.0 / 10 |
 
 > ⚠️ Non usare la categoria "Medicina": revisione più severa. L'app è un diario organizzativo, NON un dispositivo medico.
 
@@ -29,7 +29,7 @@ Prova gratis 30 giorni. Il diario condiviso per familiari, badanti e OSS: annota
 
 ## Descrizione (max 4000)
 ```
-Caregiver Sync: Diario di Cura è il DIARIO PERSONALE DI CURA per le famiglie che assistono un anziano o un familiare non autosufficiente. Non è un dispositivo medico e non sostituisce il parere di un professionista sanitario: è uno strumento organizzativo per chi si prende cura di qualcuno.
+Caregiver Senior è il DIARIO PERSONALE DI CURA per le famiglie che assistono un anziano o un familiare non autosufficiente. Non è un dispositivo medico e non sostituisce il parere di un professionista sanitario: è uno strumento organizzativo per chi si prende cura di qualcuno.
 
 DIARIO GIORNALIERO CONDIVISO
 Annota osservazioni, routine, orari e note libere. Familiari, badanti e OSS trovano subito tutto ciò che serve per il turno.
@@ -65,7 +65,7 @@ Privacy: [URL della privacy policy]
 | URL privacy policy | pubblicare `PRIVACY_POLICY.md` (lo stesso di Android) |
 
 ## Abbonamenti (App Store Connect → Abbonamenti)
-- Gruppo: `Caregiver Sync: Diario di Cura Premium`
+- Gruppo: `Caregiver Senior Premium`
 - Prodotto 1 — ID `premium_monthly` — 1 mese — **4,99 €** — **senza** prova gratuita (la prova di 30 giorni è gestita dall'app)
 - Prodotto 2 — ID `premium_yearly` — 1 anno — **49,90 €** — **senza** prova gratuita
 - Nome visualizzato: `Premium mensile` / `Premium annuale`

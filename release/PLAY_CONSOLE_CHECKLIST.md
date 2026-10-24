@@ -1,4 +1,4 @@
-# ✅ Checklist Pubblicazione Google Play Console — Caregiver Sync v1.1.1
+# ✅ Checklist Pubblicazione Google Play Console — Caregiver Senior v1.1.1
 
 Guida operativa passo-passo. Segui l'ordine, spunta ogni sezione, e in ~2 ore avrai la scheda pronta per la revisione Google.
 
@@ -27,7 +27,7 @@ Guida operativa passo-passo. Segui l'ordine, spunta ogni sezione, e in ~2 ore av
 - ⬜ Paga la **quota di iscrizione: 25 USD una tantum**
 - ⬜ Compila la sezione **"Dettagli account sviluppatore"**:
   - Tipo: personale o organizzazione (per un'app medicale meglio organizzazione se possibile)
-  - Nome sviluppatore visibile: es. "Caregiver Sync" (**non modificabile facilmente**, sceglilo bene)
+  - Nome sviluppatore visibile: es. "Caregiver Senior" (**non modificabile facilmente**, sceglilo bene)
   - Email di contatto pubblico
   - Indirizzo (verrà mostrato sulla scheda Play)
 - ⬜ Verifica identità con documento (richiesto per app medicali dal 2023)
@@ -41,7 +41,7 @@ Guida operativa passo-passo. Segui l'ordine, spunta ogni sezione, e in ~2 ore av
 **Ordine cronologico**: fai questo PRIMA di compilare la scheda, perché serve un URL pubblico.
 
 ### Opzione A — Notion (più veloce, 5 minuti)
-- ⬜ Apri Notion, crea una nuova pagina "Privacy Policy — Caregiver Sync"
+- ⬜ Apri Notion, crea una nuova pagina "Privacy Policy — Caregiver Senior"
 - ⬜ Apri `PRIVACY_POLICY.md`, copia tutto il testo
 - ⬜ Incolla nella pagina Notion
 - ⬜ Sostituisci i placeholder `[…]` con i tuoi dati reali:
@@ -68,7 +68,7 @@ Guida operativa passo-passo. Segui l'ordine, spunta ogni sezione, e in ~2 ore av
 ## 📋 STEP 3 — Crea l'app su Play Console
 
 - ⬜ Play Console → **Tutte le app** → **Crea app**
-- ⬜ Nome dell'app: `Caregiver Sync` (visibile sullo store, modificabile dopo)
+- ⬜ Nome dell'app: `Caregiver Senior` (visibile sullo store, modificabile dopo)
 - ⬜ Lingua predefinita: **Italiano - it-IT**
 - ⬜ Tipo: **App** (non gioco)
 - ⬜ Gratuita o a pagamento: **Gratuita**
@@ -84,7 +84,7 @@ Guida operativa passo-passo. Segui l'ordine, spunta ogni sezione, e in ~2 ore av
 **Menu laterale → "Cresci → Presenza in store → Scheda del Play Store principale"**
 
 ### 4.1 Dettagli app
-- ⬜ **Nome app**: `Caregiver Sync: cura & IA` (24/30 caratteri, da `MARKETING.md`)
+- ⬜ **Nome app**: `Caregiver Senior: cura & IA` (24/30 caratteri, da `MARKETING.md`)
 - ⬜ **Descrizione breve** (80 char): copia da `MARKETING.md` sezione "Descrizione breve":
   > `Diario condiviso per assistiti anziani e cronici, con consegne generate dall'IA`
 - ⬜ **Descrizione completa** (max 4000 char): copia dal `MARKETING.md` sezione "Descrizione completa"
@@ -123,7 +123,7 @@ Se vuoi te la genero: scrivimi *"generami il feature graphic"* e in 2 minuti hai
 Alternativa rapida DIY (15 min):
 - Apri Canva → template "Google Play Feature Graphic"
 - Sfondo teal `#0F766E`
-- Al centro: logo cuore bianco + testo "Caregiver Sync — cura condivisa con IA"
+- Al centro: logo cuore bianco + testo "Caregiver Senior — cura condivisa con IA"
 - Esporta PNG 1024×500
 
 ---

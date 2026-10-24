@@ -1,6 +1,6 @@
 # 🔒 Modulo "Sicurezza dei Dati" — Google Play Console
 
-Compila esattamente queste risposte nella sezione **App Content → Data safety** della Play Console. Sono conformi al comportamento reale di Caregiver Sync v1.0.0.
+Compila esattamente queste risposte nella sezione **App Content → Data safety** della Play Console. Sono conformi al comportamento reale di Caregiver Senior v1.0.0.
 
 ---
 
@@ -104,7 +104,7 @@ Quando l'utente attiva la funzione **"Genera consegna con IA"**, il contenuto de
 Copia-incolla nel campo di testo "Additional details" della sezione Data safety:
 
 ```
-Caregiver Sync raccoglie i dati inseriti dall'utente relativi all'assistito
+Caregiver Senior raccoglie i dati inseriti dall'utente relativi all'assistito
 (nome, patologia, anno di nascita, note del profilo) e le voci del diario
 clinico (parametri vitali, farmaci, sintomi, note). Tutti i dati sono
 trasmessi via HTTPS e archiviati in un database MongoDB gestito dallo

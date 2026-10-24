@@ -1,4 +1,4 @@
-# Marketing per Google Play Console — Caregiver Sync
+# Marketing per Google Play Console — Caregiver Senior
 
 **Positioning: DIARIO PERSONALE DI CURA (NON app medica)**
 
@@ -8,7 +8,7 @@ Categoria Play Store consigliata: **Stile di vita** o **Casa e famiglia** (NON "
 
 ## Titolo app (max 30 caratteri)
 ```
-Caregiver Sync
+Caregiver Senior
 ```
 
 ## Descrizione breve (max 80 caratteri)
@@ -18,7 +18,7 @@ Diario di cura per la famiglia: annota, condividi e ricevi note IA per i turni.
 
 ## Descrizione lunga (max 4000 caratteri)
 ```
-Caregiver Sync è un DIARIO PERSONALE DI CURA per famiglie che assistono un anziano o un familiare non autosufficiente. NON è un dispositivo medico e non sostituisce il parere di un professionista sanitario. È uno strumento organizzativo che ti aiuta a:
+Caregiver Senior è un DIARIO PERSONALE DI CURA per famiglie che assistono un anziano o un familiare non autosufficiente. NON è un dispositivo medico e non sostituisce il parere di un professionista sanitario. È uno strumento organizzativo che ti aiuta a:
 
 📓 TENERE IL DIARIO GIORNALIERO
 Annota comodamente osservazioni, routine, orari e note libere che il caregiver del turno successivo deve conoscere. Un familiare, una badante, un OSS: chiunque riprende il turno trova subito le informazioni utili.
@@ -35,17 +35,17 @@ Visualizza in un grafico semplice come cambiano nel tempo i valori che decidi tu
 • Nessuna condivisione con terzi.
 • Nessuna profilazione pubblicitaria.
 
-✨ PIANO PRO OPZIONALE
-Le consegne IA sono limitate a 3 al mese nel piano gratuito. Con il piano Pro (abbonamento mensile) ne hai illimitate. L'abbonamento è opzionale — l'app funziona pienamente anche senza.
+✨ PROVA GRATUITA E PREMIUM
+30 giorni gratis, senza carta. Poi abbonamento Premium: 4,99 € al mese oppure 49,90 € all'anno. Se la tua cooperativa o il tuo ente ha una convenzione, inserisci il codice e usi Premium senza pagare.
 
-CHI USA CAREGIVER SYNC?
+CHI USA CAREGIVER SENIOR?
 • Famiglie che si alternano nell'assistenza di un anziano
 • Familiari a distanza che vogliono restare aggiornati
 • Chi coordina più figure (badante, OSS, parenti)
 • Chiunque voglia un diario ordinato al posto di post-it e messaggi sparsi
 
 IMPORTANTE
-Caregiver Sync è un'app di ORGANIZZAZIONE e ANNOTAZIONI PERSONALI. Non fornisce diagnosi, terapie o consigli medici. Consulta sempre un professionista sanitario per decisioni cliniche.
+Caregiver Senior è un'app di ORGANIZZAZIONE e ANNOTAZIONI PERSONALI. Non fornisce diagnosi, terapie o consigli medici. Consulta sempre un professionista sanitario per decisioni cliniche.
 
 L'app funziona con connessione a internet. I dati sono conservati in modo sicuro e possono essere eliminati dall'utente in ogni momento dalla schermata "Gestione dati".
 ```

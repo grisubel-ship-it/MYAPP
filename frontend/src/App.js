@@ -44,6 +44,7 @@ import ProPage from "@/pages/ProPage";
 import AdminPage from "@/pages/AdminPage";
 import { AccessProvider, AccessGate, TrialBanner, DeepLinkHandler } from "@/components/AccessGate";
 import CodeLandingPage from "@/pages/CodeLandingPage";
+import DownloadPage from "@/pages/DownloadPage";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -238,7 +239,7 @@ function Shell({ children }) {
               <Heart size={18} className="text-white" fill="white" />
             </div>
             <div>
-              <div className="font-semibold text-stone-900 leading-tight">Caregiver Sync</div>
+              <div className="font-semibold text-stone-900 leading-tight">Caregiver Senior</div>
               <div className="text-xs text-stone-500 leading-tight">Anziani & Cronici</div>
             </div>
           </Link>
@@ -1476,6 +1477,7 @@ function App() {
           <Route path="/pro" element={<ProPage />} />
           <Route path="/admin" element={<AdminPage />} />
           <Route path="/c/:code" element={<CodeLandingPage />} />
+          <Route path="/scarica" element={<DownloadPage />} />
         </Routes>
         </AccessGate>
       </Shell>

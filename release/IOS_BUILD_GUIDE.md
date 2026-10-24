@@ -1,9 +1,9 @@
-# Guida iOS — Caregiver Sync: Diario di Cura
+# Guida iOS — Caregiver Senior
 
 ## Cosa contiene `ios-project.zip`
 ```
-caregiver-sync-ios/
-├── ios/                    → progetto Xcode (Capacitor 6) già sincronizzato, versione 1.5.0 build 9
+caregiver-senior-ios/
+├── ios/                    → progetto Xcode (Capacitor 6) già sincronizzato, versione 1.6.0 build 10
 ├── src/, public/           → sorgente web React (per ricompilare con la chiave iOS)
 ├── package.json, yarn.lock, capacitor.config.js, .env.production
 ├── APP_STORE_LISTING.md    → nome, sottotitolo, parole chiave, descrizione, abbonamenti, privacy
@@ -13,10 +13,10 @@ caregiver-sync-ios/
 ## Specifiche
 | Campo | Valore |
 |---|---|
-| Nome App Store | **Caregiver Sync: Diario di Cura** |
-| Nome sotto l'icona | Caregiver Sync |
+| Nome App Store | **Caregiver Senior** |
+| Nome sotto l'icona | Caregiver Senior |
 | Bundle ID | `com.caregiversync.app` |
-| Versione | 1.5.0 (build 9) |
+| Versione | 1.6.0 (build 10) |
 | iOS minimo | 13.0 (Capacitor 6) |
 | Categoria | Salute e fitness (secondaria: Lifestyle) |
 | Abbonamenti | `premium_monthly` 4,99 € · `premium_yearly` 49,90 € — senza trial Apple |
@@ -27,13 +27,13 @@ caregiver-sync-ios/
 | Backend | produzione, già configurato |
 
 ## Passi per lo sviluppatore (Mac + Xcode 15+)
-1. `unzip ios-project.zip && cd caregiver-sync-ios`
+1. `unzip ios-project.zip && cd caregiver-senior-ios`
 2. Su RevenueCat aggiungi l'app iOS e copia la **chiave pubblica Apple** (`appl_...`)
 3. Incollala in `.env.production` alla riga `REACT_APP_RC_IOS_KEY=`
 4. `yarn install && yarn build && npx cap sync ios`
 5. `cd ios/App && pod install` poi apri `App.xcworkspace`
 6. Signing & Capabilities: seleziona il Team Apple, aggiungi la capability **In-App Purchase**
-7. Su App Store Connect crea l'app con nome **Caregiver Sync: Diario di Cura** e Bundle ID `com.caregiversync.app`; crea i 2 abbonamenti come da `APP_STORE_LISTING.md`
+7. Su App Store Connect crea l'app con nome **Caregiver Senior** e Bundle ID `com.caregiversync.app`; crea i 2 abbonamenti come da `APP_STORE_LISTING.md`
 8. Xcode → **Product → Archive → Distribute App → App Store Connect → Upload**
 9. Compila la scheda con i testi di `APP_STORE_LISTING.md` e invia in revisione
 
@@ -49,7 +49,7 @@ Mi serve pubblicarla su App Store:
    (premium_monthly 4,99 €, premium_yearly 49,90 €, senza trial)
 4. Caricare la build e inviarla in revisione con i testi forniti
 
-Nome app: Caregiver Sync: Diario di Cura
+Nome app: Caregiver Senior
 Bundle ID: com.caregiversync.app
 Ho pronti: icona 1024, screenshot, testi, privacy policy.
 Preventivo e tempi?

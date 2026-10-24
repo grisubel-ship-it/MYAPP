@@ -1,4 +1,4 @@
-"""Volantino A4 Caregiver Sync — layout richiesto:
+"""Volantino A4 Caregiver Senior — layout richiesto:
 - Logo banner intero in alto (ben visibile)
 - Vantaggi in bullet points
 - QR code sotto/laterale"""
@@ -21,7 +21,7 @@ AMBER = HexColor("#F59E0B")
 
 
 def build_logo_banner(path, w=1600, h=640):
-    """Ricrea la banner-logo mostrata dall'utente: verde gradient + cuore bianco + 'Caregiver Sync'."""
+    """Ricrea la banner-logo mostrata dall'utente: verde gradient + cuore bianco + 'Caregiver Senior'."""
     img = Image.new("RGB", (w, h), "#4A8F5B")
     draw = ImageDraw.Draw(img)
     # Gradient diagonale verde chiaro -> verde scuro
@@ -48,7 +48,7 @@ def build_logo_banner(path, w=1600, h=640):
         (cx, cy + int(r_heart*1.8)),
     ], fill="white")
 
-    # Testo "Caregiver Sync"
+    # Testo "Caregiver Senior"
     font_paths = [
         "/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf",
         "/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf",
@@ -64,7 +64,7 @@ def build_logo_banner(path, w=1600, h=640):
         font = ImageFont.truetype(font_path, font_size) if font_path else ImageFont.load_default()
     except Exception:
         font = ImageFont.load_default()
-    text = "Caregiver Sync"
+    text = "Caregiver Senior"
     bbox = draw.textbbox((0, 0), text, font=font)
     tw = bbox[2] - bbox[0]
     th = bbox[3] - bbox[1]
@@ -89,12 +89,29 @@ def make_qr_png(url, path, box_size=20, border=2):
     img.save(path, "PNG")
 
 
-def draw_flyer(path, qr_url, title_badge, cta_text, steps):
+def draw_store_badges(c, cx, y):
+    """Due badge neri 'Google Play' e 'App Store' centrati su cx."""
+    c.setFillColor(STONE_900)
+    c.setFont("Helvetica-Bold", 13)
+    c.drawCentredString(cx, y + 52, "Disponibile su")
+    bw, bh, gap = 170, 44, 18
+    for i, (small, big) in enumerate([("DISPONIBILE SU", "Google Play"), ("SCARICA SU", "App Store")]):
+        x = cx - bw - gap / 2 + i * (bw + gap)
+        c.setFillColor(HexColor("#111111"))
+        c.roundRect(x, y, bw, bh, 10, fill=1, stroke=0)
+        c.setFillColor(white)
+        c.setFont("Helvetica", 7.5)
+        c.drawCentredString(x + bw / 2, y + 29, small)
+        c.setFont("Helvetica-Bold", 16)
+        c.drawCentredString(x + bw / 2, y + 11, big)
+
+
+def draw_flyer(path, qr_url, title_badge, cta_text, steps, show_stores=False):
     c = canvas.Canvas(path, pagesize=A4)
-    c.setTitle("Caregiver Sync — Volantino promozionale")
+    c.setTitle("Caregiver Senior — Volantino promozionale")
 
     # === 1) Logo banner GRANDE in alto (tutta la larghezza) — usa il logo reale dell'utente ===
-    logo_src = "/app/release/logo-caregiver-sync.png"
+    logo_src = "/app/release/logo-caregiver-senior.png"
     # Il logo ha aspect ratio 2000:814 (~2.457:1)
     banner_h = int(PAGE_W / (2000 / 814))  # mantieni ratio reale
     c.drawImage(logo_src, 0, PAGE_H - banner_h, width=PAGE_W, height=banner_h, mask='auto')
@@ -102,10 +119,10 @@ def draw_flyer(path, qr_url, title_badge, cta_text, steps):
     # Badge arancione subito sotto il banner
     badge_y = PAGE_H - banner_h - 22
     c.setFillColor(AMBER)
-    bw = 260
+    c.setFont("Helvetica-Bold", 11)
+    bw = c.stringWidth(title_badge, "Helvetica-Bold", 11) + 44
     c.roundRect((PAGE_W - bw) / 2, badge_y, bw, 28, 14, fill=1, stroke=0)
     c.setFillColor(white)
-    c.setFont("Helvetica-Bold", 11)
     c.drawCentredString(PAGE_W / 2, badge_y + 9, title_badge)
 
     # === 2) Titolo e sottotitolo ===
@@ -116,7 +133,7 @@ def draw_flyer(path, qr_url, title_badge, cta_text, steps):
     y -= 24
     c.setFillColor(STONE_500)
     c.setFont("Helvetica", 12)
-    c.drawCentredString(PAGE_W / 2, y, "Note condivise, consegne tra turni e un aiuto IA — gratis, senza registrazione.")
+    c.drawCentredString(PAGE_W / 2, y, "Note condivise, consegne tra turni e un aiuto IA — 30 giorni gratis, senza registrazione.")
 
     # === 3) Vantaggi (bullet) a sinistra + QR a destra ===
     content_top = y - 50
@@ -186,10 +203,13 @@ def draw_flyer(path, qr_url, title_badge, cta_text, steps):
     c.setFont("Helvetica-Oblique", 8)
     c.drawCentredString(qr_x + qr_size/2, qr_y - 50, cta_text)
 
+    if show_stores:
+        draw_store_badges(c, PAGE_W / 2, min(yy, qr_y - 65) - 40)
+
     # === 4) Footer ===
     c.setFillColor(STONE_500)
     c.setFont("Helvetica-Oblique", 9)
-    c.drawCentredString(PAGE_W / 2, 52, "Caregiver Sync • App di annotazione per familiari")
+    c.drawCentredString(PAGE_W / 2, 52, "Caregiver Senior • App di annotazione per familiari")
     c.setFont("Helvetica", 8)
     c.drawCentredString(PAGE_W / 2, 38, "Non è un dispositivo medico • Non sostituisce il parere di un professionista sanitario")
 
@@ -198,20 +218,21 @@ def draw_flyer(path, qr_url, title_badge, cta_text, steps):
     print(f"OK: {path}")
 
 
-# Volantino Play Store
-PLAY_STORE_URL = "https://play.google.com/store/apps/details?id=com.caregiversync.app"
+# Volantino Store: il QR apre /scarica che porta a Google Play o App Store in base al telefono
+DOWNLOAD_URL = "https://app-release-config.emergent.host/scarica"
 draw_flyer(
-    f"{OUT_DIR}/volantino-caregiver-sync-playstore.pdf",
-    qr_url=PLAY_STORE_URL,
-    title_badge="DISPONIBILE SU GOOGLE PLAY",
-    cta_text="o cerca 'Caregiver Sync' su Google Play",
+    f"{OUT_DIR}/volantino-caregiver-senior-playstore.pdf",
+    qr_url=DOWNLOAD_URL,
+    title_badge="DISPONIBILE SU GOOGLE PLAY E APP STORE",
+    cta_text="o cerca 'Caregiver Senior' nello store",
     steps=[],
+    show_stores=True,
 )
 
 # Volantino Beta
 BETA_URL = "https://play.google.com/apps/testing/com.caregiversync.app"
 draw_flyer(
-    f"{OUT_DIR}/volantino-caregiver-sync-beta.pdf",
+    f"{OUT_DIR}/volantino-caregiver-senior-beta.pdf",
     qr_url=BETA_URL,
     title_badge="ACCESSO BETA TESTER",
     cta_text="Il tuo email deve essere nella lista tester",

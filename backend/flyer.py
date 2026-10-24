@@ -1,4 +1,5 @@
 import io
+import os
 from urllib.parse import quote
 from pathlib import Path
 
@@ -9,8 +10,7 @@ from reportlab.lib.utils import ImageReader
 from reportlab.pdfgen import canvas
 
 PAGE_W, PAGE_H = A4
-LOGO = Path(__file__).parent / "assets" / "logo-caregiver-sync.png"
-PLAY_URL = "https://play.google.com/store/apps/details?id=com.caregiversync.app"
+LOGO = Path(__file__).parent / "assets" / "logo-caregiver-senior.png"
 GREEN = HexColor("#4A8F5B")
 GREEN_DARK = HexColor("#2F6B3F")
 STONE_900 = HexColor("#1C1917")
@@ -46,7 +46,7 @@ def _fit(c, text, font, size, max_w, min_size=7):
 
 def _qr(code: str):
     qr = qrcode.QRCode(error_correction=qrcode.constants.ERROR_CORRECT_H, box_size=20, border=2)
-    qr.add_data(f"{PLAY_URL}&referrer={quote('conv_code=' + code)}")
+    qr.add_data(f"{os.environ['PUBLIC_APP_URL']}/c/{quote(code)}")
     qr.make(fit=True)
     buf = io.BytesIO()
     qr.make_image(fill_color="#1C1917", back_color="white").convert("RGB").save(buf, "PNG")
@@ -54,10 +54,26 @@ def _qr(code: str):
     return ImageReader(buf)
 
 
+def _store_badges(c, cx, y):
+    c.setFillColor(STONE_900)
+    c.setFont("Helvetica-Bold", 12)
+    c.drawCentredString(cx, y + 52, "Disponibile su")
+    bw, bh, gap = 160, 42, 16
+    for i, (small, big) in enumerate([("DISPONIBILE SU", "Google Play"), ("SCARICA SU", "App Store")]):
+        x = cx - bw - gap / 2 + i * (bw + gap)
+        c.setFillColor(HexColor("#111111"))
+        c.roundRect(x, y, bw, bh, 10, fill=1, stroke=0)
+        c.setFillColor(white)
+        c.setFont("Helvetica", 7.5)
+        c.drawCentredString(x + bw / 2, y + 28, small)
+        c.setFont("Helvetica-Bold", 15)
+        c.drawCentredString(x + bw / 2, y + 10, big)
+
+
 def build_coop_flyer(cooperative_name: str, code: str, duration_months: int) -> bytes:
     buf = io.BytesIO()
     c = canvas.Canvas(buf, pagesize=A4)
-    c.setTitle(f"Caregiver Sync - {cooperative_name}")
+    c.setTitle(f"Caregiver Senior - {cooperative_name}")
 
     banner_h = PAGE_W / (2000 / 814)
     c.drawImage(ImageReader(str(LOGO)), 0, PAGE_H - banner_h, width=PAGE_W, height=banner_h, mask="auto")
@@ -126,7 +142,7 @@ def build_coop_flyer(cooperative_name: str, code: str, duration_months: int) -> 
     c.drawImage(_qr(code), qx, qy, width=qs, height=qs, mask="auto")
     c.setFillColor(STONE_500)
     c.setFont("Helvetica", 8.5)
-    c.drawCentredString(qx + qs / 2, qy - 12, "o cerca 'Caregiver Sync' su Google Play")
+    c.drawCentredString(qx + qs / 2, qy - 12, "o cerca 'Caregiver Senior' nello store")
 
     # Passi
     sy = min(yy, qy - 30) - 10
@@ -134,8 +150,8 @@ def build_coop_flyer(cooperative_name: str, code: str, duration_months: int) -> 
     c.setFont("Helvetica-Bold", 13)
     c.drawString(50, sy, "Come attivare Premium")
     steps = [
-        "Scarica Caregiver Sync da Google Play",
-        "Aprila: con il QR il codice si attiva da solo",
+        "Scarica Caregiver Senior da Google Play o App Store",
+        "Su Android, con il QR il codice si attiva da solo",
         "Altrimenti tocca Premium e inserisci il codice qui sopra",
     ]
     c.setFont("Helvetica", 11)
@@ -150,9 +166,11 @@ def build_coop_flyer(cooperative_name: str, code: str, duration_months: int) -> 
         c.setFont("Helvetica", 11)
         c.drawString(74, sy, s)
 
+    _store_badges(c, PAGE_W / 2, sy - 95)
+
     c.setFillColor(STONE_500)
     c.setFont("Helvetica-Oblique", 9)
-    c.drawCentredString(PAGE_W / 2, 52, "Caregiver Sync - App di annotazione per familiari e caregiver")
+    c.drawCentredString(PAGE_W / 2, 52, "Caregiver Senior - App di annotazione per familiari e caregiver")
     c.setFont("Helvetica", 8)
     c.drawCentredString(PAGE_W / 2, 38, "Non è un dispositivo medico - Non sostituisce il parere di un professionista sanitario")
     c.showPage()

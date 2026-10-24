@@ -1,8 +1,8 @@
-# Privacy Policy — Caregiver Sync
+# Privacy Policy — Caregiver Senior
 
 **Ultimo aggiornamento**: 3 agosto 2026
-**App**: Caregiver Sync v1.0.0
-**Titolare del trattamento**: Caregiver Sync (Italia) — email: `supporto@caregiversync.example`
+**App**: Caregiver Senior v1.0.0
+**Titolare del trattamento**: Caregiver Senior (Italia) — email: `supporto@caregiversync.example`
 
 > ⚠️ **Prima di pubblicare**: sostituisci i placeholder tra `[…]` con i tuoi dati reali (ragione sociale, indirizzo, email, PEC).
 
@@ -10,7 +10,7 @@
 
 ## 1. Introduzione
 
-Caregiver Sync è un'applicazione mobile pensata per aiutare i familiari, le badanti, gli OSS e gli infermieri domiciliari a coordinare la cura di persone anziane o affette da patologie croniche. La presente Privacy Policy descrive **quali dati raccogliamo, come li utilizziamo, con chi li condividiamo e quali diritti hai**, in conformità al **Regolamento UE 2016/679 (GDPR)** e al **D. Lgs. 196/2003** italiano.
+Caregiver Senior è un'applicazione mobile pensata per aiutare i familiari, le badanti, gli OSS e gli infermieri domiciliari a coordinare la cura di persone anziane o affette da patologie croniche. La presente Privacy Policy descrive **quali dati raccogliamo, come li utilizziamo, con chi li condividiamo e quali diritti hai**, in conformità al **Regolamento UE 2016/679 (GDPR)** e al **D. Lgs. 196/2003** italiano.
 
 Utilizzando l'app dichiari di aver letto e compreso questa informativa.
 
@@ -29,7 +29,7 @@ Non abbiamo l'obbligo di nominare un DPO (Data Protection Officer) ai sensi dell
 
 ## 3. Dati personali che raccogliamo
 
-Caregiver Sync raccoglie **esclusivamente i dati che tu, come caregiver, inserisci volontariamente nell'app** relativi all'assistito che stai seguendo. L'app **non richiede la creazione di un account, non raccoglie email, non traccia la tua posizione, non accede ai contatti né alla galleria**.
+Caregiver Senior raccoglie **esclusivamente i dati che tu, come caregiver, inserisci volontariamente nell'app** relativi all'assistito che stai seguendo. L'app **non richiede la creazione di un account, non raccoglie email, non traccia la tua posizione, non accede ai contatti né alla galleria**.
 
 ### 3.1 Dati inseriti dall'utente
 
@@ -42,7 +42,7 @@ I dati relativi alla salute sono classificati come **"categorie particolari di d
 
 ### 3.2 Dati NON raccolti
 
-Caregiver Sync **NON raccoglie**:
+Caregiver Senior **NON raccoglie**:
 - ❌ Il tuo nome, email, numero di telefono o indirizzo
 - ❌ La tua posizione geografica (né precisa né approssimata)
 - ❌ Identificatori pubblicitari (IDFA, AAID)
@@ -110,7 +110,7 @@ Puoi utilizzare tutte le altre funzioni dell'app **senza mai attivare la funzion
 
 ### 5.5 Limiti della funzione IA
 
-L'IA di Caregiver Sync **non è un dispositivo medico**, non fornisce diagnosi, non prescrive terapie, non sostituisce il parere del medico. È esclusivamente uno strumento di supporto alla comunicazione tra caregiver. Ogni decisione clinica deve essere presa in accordo con il medico curante dell'assistito.
+L'IA di Caregiver Senior **non è un dispositivo medico**, non fornisce diagnosi, non prescrive terapie, non sostituisce il parere del medico. È esclusivamente uno strumento di supporto alla comunicazione tra caregiver. Ogni decisione clinica deve essere presa in accordo con il medico curante dell'assistito.
 
 ---
 
@@ -164,14 +164,14 @@ In qualsiasi momento hai il diritto di:
 ### 9.1 Come richiedere la cancellazione dei dati
 
 **Modalità 1 — In-app (raccomandata, cancellazione immediata)**:
-1. Apri Caregiver Sync
+1. Apri Caregiver Senior
 2. Tocca l'icona ingranaggio in alto a destra
 3. Scorri fino alla sezione **"Zona pericolosa"**
 4. Tocca **"Reset totale dell'app"**
 5. Conferma → tutti i tuoi dati vengono eliminati dal server immediatamente
 
 **Modalità 2 — Via email**:
-Invia una richiesta a `supporto@caregiversync.example` indicando "Richiesta cancellazione dati Caregiver Sync". Rispondiamo entro 30 giorni ai sensi dell'art. 12 GDPR.
+Invia una richiesta a `supporto@caregiversync.example` indicando "Richiesta cancellazione dati Caregiver Senior". Rispondiamo entro 30 giorni ai sensi dell'art. 12 GDPR.
 
 ---
 
@@ -190,7 +190,7 @@ Nonostante questi accorgimenti, nessun sistema è invulnerabile al 100%. In caso
 
 ## 11. Minori
 
-Caregiver Sync **NON è destinata a minori di 18 anni**. Se sei minorenne, non usare l'app. Se veniamo a conoscenza del fatto che un minorenne ha inserito dati, li cancelleremo tempestivamente. Segnala all'indirizzo `supporto@caregiversync.example`.
+Caregiver Senior **NON è destinata a minori di 18 anni**. Se sei minorenne, non usare l'app. Se veniamo a conoscenza del fatto che un minorenne ha inserito dati, li cancelleremo tempestivamente. Segnala all'indirizzo `supporto@caregiversync.example`.
 
 ---
 
@@ -222,4 +222,4 @@ Per qualsiasi controversia relativa al trattamento dei dati personali il foro co
 
 ---
 
-**Grazie per usare Caregiver Sync in modo consapevole. La tua fiducia è il nostro impegno.** ❤️
+**Grazie per usare Caregiver Senior in modo consapevole. La tua fiducia è il nostro impegno.** ❤️

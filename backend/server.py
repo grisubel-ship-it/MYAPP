@@ -20,7 +20,7 @@ mongo_url = os.environ['MONGO_URL']
 client = AsyncIOMotorClient(mongo_url)
 db = client[os.environ['DB_NAME']]
 
-app = FastAPI(title="Caregiver Sync API")
+app = FastAPI(title="Caregiver Senior API")
 api_router = APIRouter(prefix="/api")
 
 
@@ -86,7 +86,7 @@ class Handover(BaseModel):
 # ---------- Routes ----------
 @api_router.get("/")
 async def root():
-    return {"message": "Caregiver Sync API online"}
+    return {"message": "Caregiver Senior API online"}
 
 
 # ----- Patients -----
@@ -569,6 +569,9 @@ ALLOWED_DOWNLOADS = {
     "caregiver-sync-v1.3.0.apk": "application/vnd.android.package-archive",
     "caregiver-sync-v1.3.1.aab": "application/octet-stream",
     "caregiver-sync-v1.3.1.apk": "application/vnd.android.package-archive",
+    "caregiver-senior-v1.6.0.aab": "application/octet-stream",
+    "caregiver-senior-v1.6.0.apk": "application/vnd.android.package-archive",
+    "google-play-kit-v1.6.0.zip": "application/zip",
     "caregiver-sync-v1.5.1.aab": "application/octet-stream",
     "caregiver-sync-v1.5.1.apk": "application/vnd.android.package-archive",
     "caregiver-sync-v1.5.0.aab": "application/octet-stream",
@@ -591,9 +594,14 @@ ALLOWED_DOWNLOADS = {
     "PRIVACY_POLICY.md": "text/markdown; charset=utf-8",
     "SUBSCRIPTIONS_SETUP.md": "text/markdown; charset=utf-8",
     "ios-project.zip": "application/zip",
+    "logo-caregiver-sync.png": "image/png",
+    "logo-caregiver-senior.png": "image/png",
     "APP_STORE_LISTING.md": "text/markdown; charset=utf-8",
     "IOS_BUILD_GUIDE.md": "text/markdown; charset=utf-8",
     "FIVERR_UPWORK_JOB.md": "text/markdown; charset=utf-8",
+    "volantino-caregiver-senior-playstore.pdf": "application/pdf",
+    "volantino-caregiver-senior-beta.pdf": "application/pdf",
+    "volantino-esempio-cooperativa.pdf": "application/pdf",
     "volantino-caregiver-sync-playstore.pdf": "application/pdf",
     "volantino-caregiver-sync-beta.pdf": "application/pdf",
 }

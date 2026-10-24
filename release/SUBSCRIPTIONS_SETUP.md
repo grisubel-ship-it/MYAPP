@@ -23,7 +23,7 @@ Guida operativa per attivare gli acquisti in-app della v1.2.0. Il **codice è gi
 
 - Clicca **Crea abbonamento**
 - **ID prodotto**: `pro` (⚠️ deve essere esattamente questo — è quello che il codice si aspetta)
-- **Nome**: `Caregiver Sync Pro`
+- **Nome**: `Caregiver Senior Pro`
 - **Descrizione**: `Consegne IA illimitate, assistiti illimitati, grafici andamento completi. Prova gratuita di 7 giorni.`
 - Vantaggi (bullet):
   - Consegne con IA illimitate
@@ -74,13 +74,13 @@ Per **entrambi** i piani base, clicca **Aggiungi offerta**:
 
 - Vai su https://app.revenuecat.com/signup
 - Registrati (gratuito fino a $10.000/mese di ricavi)
-- Crea un nuovo **progetto**: `Caregiver Sync`
+- Crea un nuovo **progetto**: `Caregiver Senior`
 
 ### 2.2 Aggiungi l'app Android
 
 Dal progetto: **Project Settings → Apps → + New**
 - Piattaforma: **Google Play Store**
-- App Name: `Caregiver Sync Android`
+- App Name: `Caregiver Senior Android`
 - Package name: `com.caregiversync.assistiti`
 - **Google Play Service Account** ⬅️ ci serve il JSON
 
@@ -203,7 +203,7 @@ Sul telefono → clicca link → installa app dal Play Store (**non** l'APK side
 
 ### 5.5 Test scenari
 
-- **Cancellazione**: Play Store → Abbonamenti → Caregiver Sync → Annulla — accesso mantenuto fino a scadenza
+- **Cancellazione**: Play Store → Abbonamenti → Caregiver Senior → Annulla — accesso mantenuto fino a scadenza
 - **Restore**: reinstalla l'app → Pro → **Ripristina acquisti** → torna Pro
 - **Scadenza forzata**: Play Console → **Play Billing Lab** per simulare scadenza in 3-5 minuti invece che 30 giorni
 

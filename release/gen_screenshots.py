@@ -13,7 +13,7 @@ DEMO_BADGE_CSS = """
   body::before {
     content: 'ESEMPIO · DATI FITTIZI';
     position: fixed;
-    top: 92px;
+    bottom: 48px;
     left: 50%;
     transform: translateX(-50%);
     z-index: 9999;
@@ -29,6 +29,7 @@ DEMO_BADGE_CSS = """
     font-family: system-ui, sans-serif;
     pointer-events: none;
   }
+  [data-testid="trial-banner"] { display: none !important; }
 """
 
 async def shoot(page, url, path, wait=1500, before=None):
@@ -45,8 +46,17 @@ async def shoot(page, url, path, wait=1500, before=None):
 async def main():
     async with async_playwright() as pw:
         browser = await pw.chromium.launch(args=["--no-sandbox"])
-        ctx = await browser.new_context(viewport={"width": 1080, "height": 1920}, device_scale_factor=1)
-        page = await ctx.new_page()
+        # Android 1080x1920, iOS 1290x2796 (iPhone 6.7")
+        for out, vp, scale in [(OUT, {"width": 1080, "height": 1920}, 1), (OUT + "-ios", {"width": 430, "height": 932}, 3)]:
+            os.makedirs(out, exist_ok=True)
+            ctx = await browser.new_context(viewport=vp, device_scale_factor=scale)
+            await shoot_all(await ctx.new_page(), out)
+            await ctx.close()
+        await browser.close()
+
+
+async def shoot_all(page, OUT):
+    if True:
 
         # 1. Home dashboard
         await shoot(page, f"{URL}/", f"{OUT}/01-home.png")
@@ -65,7 +75,5 @@ async def main():
 
         # 4. Settings / GDPR page
         await shoot(page, f"{URL}/impostazioni", f"{OUT}/04-settings.png")
-
-        await browser.close()
 
 asyncio.run(main())

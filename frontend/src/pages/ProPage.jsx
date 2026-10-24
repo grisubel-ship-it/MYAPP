@@ -176,7 +176,7 @@ export default function ProPage() {
         <div className="w-14 h-14 rounded-2xl bg-teal-600 mx-auto grid place-items-center">
           <Crown size={26} className="text-white" />
         </div>
-        <h1 className="text-3xl font-serif text-stone-900">Caregiver Sync Premium</h1>
+        <h1 className="text-3xl font-serif text-stone-900">Caregiver Senior Premium</h1>
         <p className="text-stone-600 text-sm">30 giorni di prova gratuita, poi scegli come continuare.</p>
       </div>
 

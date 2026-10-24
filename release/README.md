@@ -1,4 +1,4 @@
-# 📦 Caregiver Sync v1.1.1 — Kit di Pubblicazione Google Play
+# 📦 Caregiver Senior v1.1.1 — Kit di Pubblicazione Google Play
 
 Tutto quello che serve per pubblicare l'app su Google Play Console. Segui il file **`PLAY_CONSOLE_CHECKLIST.md`** per la guida step-by-step.
 
@@ -60,8 +60,8 @@ Validità:         fino al 19 dicembre 2053
 Fingerprint SHA-256:
   55:B2:98:5B:02:4C:9C:21:1E:3E:71:97:B6:48:3E:32:
   25:02:4D:B9:6E:8A:B0:EC:5A:1D:54:EF:1A:EF:CE:F1
-Owner:  CN=Caregiver Sync Assistiti, OU=Mobile,
-        O=Caregiver Sync, L=Milano, ST=IT, C=IT
+Owner:  CN=Caregiver Senior Assistiti, OU=Mobile,
+        O=Caregiver Senior, L=Milano, ST=IT, C=IT
 ```
 
 > ⚠️ **CRITICO**: Se perdi la keystore o le password **NON POTRAI PIÙ AGGIORNARE L'APP** su Google Play. Salva subito in 1Password/Bitwarden + carica il file `.jks` in una cartella cloud sicura (Drive/Dropbox/iCloud).

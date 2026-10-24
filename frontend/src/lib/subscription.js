@@ -176,3 +176,8 @@ export function parseCodeFromText(text) {
 
 export const PLAY_URL = "https://play.google.com/store/apps/details?id=com.caregiversync.app";
 export const playUrlWithCode = (code) => `${PLAY_URL}&referrer=${encodeURIComponent(`conv_code=${code}`)}`;
+
+// Da compilare quando l'app sarà pubblicata su App Store (es. https://apps.apple.com/it/app/caregiver-senior/id123)
+export const APP_STORE_URL = "";
+export const isIOSDevice = () => /iphone|ipad|ipod/i.test(navigator.userAgent);
+export const isAndroidDevice = () => /android/i.test(navigator.userAgent);

@@ -1,4 +1,4 @@
-# Annuncio Fiverr / Upwork — Pubblicazione iOS di Caregiver Sync
+# Annuncio Fiverr / Upwork — Pubblicazione iOS di Caregiver Senior
 
 Copia-incolla questo testo. Ci sono due versioni: **italiana** (per Fiverr.com/it) e **inglese** (per audience più ampia + prezzi più competitivi).
 
@@ -16,7 +16,7 @@ Compilare e pubblicare su App Store un'app Capacitor iOS pronta (progetto fornit
 Cerco uno sviluppatore iOS esperto in Capacitor per COMPILARE E PUBBLICARE su App Store un'app già completa. Il progetto è pronto, il lavoro consiste solo in build + firma + upload.
 
 📱 PROGETTO
-App: "Caregiver Sync: Diario di Cura"
+App: "Caregiver Senior"
 Bundle ID: com.caregiversync.app
 Framework: Capacitor 6 (React 19 + FastAPI backend già live)
 Versione da pubblicare: 1.2.9 (identica alla release Android già live su Play Store)
@@ -82,7 +82,7 @@ Build & submit ready-to-publish Capacitor iOS app to App Store (project provided
 I need an experienced iOS developer familiar with Capacitor to BUILD AND SUBMIT a fully-completed app to the App Store. The project is READY — the task is just build + sign + upload.
 
 📱 PROJECT
-App name: "Caregiver Sync: Diario di Cura" (Italian caregiver diary app)
+App name: "Caregiver Senior" (Italian caregiver diary app)
 Bundle ID: com.caregiversync.app
 Framework: Capacitor 6 (React 19 + FastAPI backend already live)
 Target version: 1.2.9 (identical to the Android release already live on Play Store)
