@@ -596,6 +596,7 @@ ALLOWED_DOWNLOADS = {
     "ios-project.zip": "application/zip",
     "logo-caregiver-sync.png": "image/png",
     "logo-caregiver-senior.png": "image/png",
+    "feature-graphic-1024x500.png": "image/png",
     "APP_STORE_LISTING.md": "text/markdown; charset=utf-8",
     "IOS_BUILD_GUIDE.md": "text/markdown; charset=utf-8",
     "FIVERR_UPWORK_JOB.md": "text/markdown; charset=utf-8",
