@@ -14,8 +14,9 @@ workflows:
         script: |
           echo "Build completata con successo"
     artifacts:
-      - build/ios/ipa/*.ipa
-      - *.ipa
+      - "build/ios/ipa/*.ipa"
+      - "*.ipa"
+   
 
 
 
