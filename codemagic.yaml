@@ -13,7 +13,7 @@ workflows:
           fi
       - name: Build React App
         script: |
-          npm run build
+          Verifica: il file viene aggiornato senza il comando npm run build
 
 
 
