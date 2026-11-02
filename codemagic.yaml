@@ -1,4 +1,3 @@
-
 workflows:
   ios-workflow:
     name: iOS Workflow
@@ -7,10 +6,14 @@ workflows:
     scripts:
       - name: Install dependencies
         script: npm install
-      - name: Build iOS app
+      - name: Install CocoaPods (se usi React Native)
         script: |
-          # Comando di compilazione iOS
-          echo "Avvio build iOS"
+          if [ -d "ios" ]; then
+            cd ios && pod install
+          fi
+      - name: Build React App
+        script: |
+          npm run build
 
 
 
