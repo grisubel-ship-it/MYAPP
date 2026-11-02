@@ -5,8 +5,8 @@ workflows:
     instance_type: mac_mini_m2
     environment:
       ios_signing:
-        distribution_type: ad_hoc
-        bundle_identifier: com.tuonome.myapp
+        distribution_type: development
+        bundle_identifier: com.grisubel.caregiversenior
     scripts:
       - name: Install dependencies
         script: npm install
@@ -16,7 +16,6 @@ workflows:
     artifacts:
       - "build/ios/ipa/*.ipa"
       - "*.ipa"
-   
 
 
 
