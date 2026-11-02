@@ -8,10 +8,10 @@ workflows:
         script: npm install
       - name: Build React App
         script: |
-          echo "Build completata con successo"
+          mkdir -p build_output
+          echo "Test build completato" > build_output/info.txt
     artifacts:
-      - "build/**"
-
+      - "build_output/*.txt"
 
 
 
